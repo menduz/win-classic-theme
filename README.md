@@ -9,11 +9,15 @@ A Windows 9x theme for GTK2, GTK3, GTK4 and Xfwm4. It is a Nix build of
 
 ### `windows-standard`
 
+![](screenshots/win-classic-standard.png)
+
 ![The GTK3 widgets of the windows-standard scheme](screenshots/win-classic-standard-widgets.png)
 
 ![The GTK4 widgets of the windows-standard scheme](screenshots/win-classic-standard-widgets-gtk4.png)
 
 ### `dark`
+
+![](screenshots/win-classic-dark.png)
 
 ![The GTK3 widgets of the dark scheme](screenshots/win-classic-dark-widgets.png)
 
