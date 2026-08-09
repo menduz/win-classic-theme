@@ -75,6 +75,14 @@
         }
       );
 
+      # `nix flake check` reads the style sheets with the parser of GTK.
+      checks = forEachSystem (pkgs: {
+        css = pkgs.callPackage ./dev/checks.nix {
+          theme = self.packages.${pkgs.system}.windows-standard;
+          themeName = themeName "windows-standard";
+        };
+      });
+
       formatter = forEachSystem (pkgs: pkgs.nixfmt-tree);
 
       # `pkgs.win-classic-theme` in another flake. See the README.
