@@ -24,3 +24,10 @@ spinbutton text {
 
 check, radio {
    -gtk-icon-size: 15px; }
+
+
+/* GTK4 draws a background image at the size of the node. This draws the
+   arrows at the size of the image. */
+
+spinbutton.horizontal > button.down, spinbutton.horizontal > button.up {
+   background-size: auto; }
