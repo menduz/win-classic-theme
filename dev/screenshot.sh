@@ -37,6 +37,11 @@ demo_dir=${4:-}
 # The demo of each toolkit that shows the widgets of a window.
 demo=builder
 
+# The size of the window of a widget factory. The two windows take the same
+# size, thus the two pictures compare.
+factory_width=1280
+factory_height=720
+
 work=$(mktemp -d)
 xvfb_pid=""
 wm_pid=""
@@ -234,7 +239,8 @@ shot_showcase() {
 }
 
 # The window of a widget factory, which holds one widget of every kind. The
-# window draws its own frame, so the picture holds the window alone.
+# window draws its own frame, so the picture holds the window alone. Both
+# windows take the same size, thus the two pictures compare.
 #
 #     shot_factory <program> <output file>
 shot_factory() {
@@ -252,7 +258,8 @@ shot_factory() {
 
   id=$(xdotool getactivewindow)
   xdotool windowmove "$id" 0 0
-  sleep 1
+  xdotool windowsize "$id" "$factory_width" "$factory_height"
+  sleep 2 # the widgets take the new size
   magick import -window "$id" -screen "$file"
   stop_x
 }
