@@ -37,7 +37,7 @@ switch:checked :disabled {
    color: transparent;
    outline-offset: -4px;
    background-color: transparent;
-   background-image: url("assets/switch_checked_disabled.png"); }
+   background-image: url("assets/switch_ins_checked.png"); }
 
 
 /* Disabled, switched off background */
@@ -47,7 +47,7 @@ switch:disabled {
    color: transparent;
    outline-offset: -4px;
    background-color: transparent;
-   background-image: url("assets/switch_disabled.png"); }
+   background-image: url("assets/switch_ins.png"); }
 
 
 /* Make switch button transparent */
