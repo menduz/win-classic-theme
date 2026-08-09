@@ -104,6 +104,9 @@ combobox button {
   border-width: 2px 18px 2px 2px;
   border-image: url("assets/combobox.png");
   border-image-slice: 2 18 2 2;
+  /* 19px and the two borders give the height of the image, thus the caret in
+     the middle slice keeps its pixels. */
+  min-height: 19px;
 }
 
 combobox button:checked,
