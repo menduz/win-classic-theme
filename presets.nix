@@ -76,7 +76,7 @@
     disabledfg = "#808080";
   };
 
-  # The dark scheme of this theme, the Redmond97 SE "Dusk Red" colors. It is
+  # The dark scheme of this theme, the "Dusk Red" colors. It is
   # the scheme that `default.nix` builds without a preset. Windows has no dark
   # scheme, so this one gives no `highlight`, no `shadow` and no `disabledfg`:
   # the build calculates the three from `bgcolor`.

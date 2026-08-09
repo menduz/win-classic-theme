@@ -88,6 +88,10 @@ window with one widget of each kind. It opens the first menu. It then writes
 the file in `READY_FILE` to show that the screenshot is ready. The menu opens
 above the list on the left. Thus it hides no important widget.
 
+![The showcase window with the windows-standard scheme](screenshots/win-classic-standard.png)
+
+![The showcase window with the dark scheme](screenshots/win-classic-dark.png)
+
 To add a scheme to `screenshots/`, add its preset to `shown` in `flake.nix`.
 Then run `update-screenshots`.
 
@@ -296,15 +300,3 @@ share/themes/<name>/
   Home Manager writes that file.
 - The image `menu_side.png` is for the Xfce4 whisker menu. This build makes it
   without a text label, because the label needs the font Lucida Sans.
-- `gtk-3.0/gtk-notebook.css` draws the frame around a note book page with the
-  selector `notebook.frame > stack`. Redmond97 SE uses
-  `notebook > stack:not(:only-child)`. GTK counts the tab header as a sibling
-  of the stack only when the header node becomes visible early enough, and a
-  window that builds its note book in C gets no frame with that test.
-- `gtk-3.0/gtk-buttons.css` puts the light edge of a button on the first line,
-  as Windows does. Redmond97 SE puts the face color there and the light edge
-  below it. A button then starts one pixel below a button that is checked,
-  because a checked button puts its dark edge on the first line.
-- `gtk-3.0/gtk-notebook.css` gives `header.left` the same top margin as
-  `header.right`. Redmond97 SE gives the left header 1px, and the first tab on
-  the left then starts one pixel below the frame of the page.

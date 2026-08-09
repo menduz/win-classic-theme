@@ -26,9 +26,6 @@ notebook.frame > header.bottom {
    margin-right: 1px;
    margin-top: 0px; }
 
-/* The same top margin as `header.right`. Redmond97 SE gives this one 1px, and
-   the first tab on the left then starts one pixel below the frame of the
-   page. */
 notebook.frame > header.left {
    margin-top: 0px;
    margin-right: 0px; }
@@ -45,12 +42,7 @@ notebook.frame > header.left, notebook.frame > header.right {
    padding-top: 0;
    padding-bottom: 0; }
 
-/* The frame around the page. GTK gives the note book the class `frame` while
-   `show-border` is true, and it removes the class when an application turns
-   the border off. Redmond97 SE tests `> stack:not(:only-child)` in its place,
-   but GTK counts the tab header as a sibling of the stack only when the
-   header node becomes visible early enough. A window that builds its note
-   book in C gets no frame at all with that test. */
+/* `.frame` is the class of GTK for `show-border`. */
 notebook.frame > stack {
    margin: 0px;
    border: 1px solid @borders;

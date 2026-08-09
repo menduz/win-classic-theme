@@ -123,7 +123,7 @@ let
 
   toColor = rgb: "#" + lib.concatMapStrings toHex rgb;
 
-  # Truncate towards zero, as the Redmond97 builder does.
+  # Truncate towards zero.
   trunc = x: if x < 0 then 0 - builtins.floor (0 - x) else builtins.floor x;
   cap =
     n:
