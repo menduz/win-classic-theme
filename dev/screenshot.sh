@@ -2,7 +2,7 @@
 #
 # Take the screenshots of one built theme.
 #
-#     screenshot.sh <theme directory> <theme name> <output directory>
+#     screenshot.sh <theme directory> <theme name> <output directory> [demos]
 #
 # The theme directory is the one that holds `gtk-3.0/` and `xfwm4/`, that is
 # `<store path>/share/themes/<name>`.
@@ -15,17 +15,27 @@
 #     <name>.png               a desktop with two windows and an open menu
 #     <name>-widgets.png       the window of gtk3-widget-factory
 #     <name>-widgets-gtk4.png  the window of gtk4-widget-factory
+#
+# With a fourth argument it writes the window of one demo of each toolkit in
+# that directory:
+#
+#     <demo>-gtk3.png          the window of gtk3-demo --run=<demo>
+#     <demo>-gtk4.png          the window of gtk4-demo --run=<demo>
 
 set -euo pipefail
 
-if [ $# -ne 3 ]; then
-  echo "usage: screenshot.sh <theme directory> <theme name> <output directory>" >&2
+if [ $# -lt 3 ] || [ $# -gt 4 ]; then
+  echo "usage: screenshot.sh <theme directory> <theme name> <output directory> [demos]" >&2
   exit 2
 fi
 
 theme_dir=$(cd "$1" && pwd)
 name=$2
 out_dir=$3
+demo_dir=${4:-}
+
+# The demo of each toolkit that shows the widgets of a window.
+demo=builder
 
 work=$(mktemp -d)
 xvfb_pid=""
@@ -247,16 +257,48 @@ shot_factory() {
   stop_x
 }
 
+# The window of one demo. Both programs take `--run`.
+#
+#     shot_demo <program> <output file>
+shot_demo() {
+  local program=$1 file=$2 id
+
+  start_x 1000x760
+  start_wm
+
+  "$program" --run="$demo" >"$work/$program-$demo.log" 2>&1 &
+  app_pid=$!
+  wait_for xdotool getactivewindow
+  sleep 3
+
+  id=$(xdotool getactivewindow)
+  xdotool windowmove "$id" 0 0
+  sleep 1
+  magick import -window "$id" -screen "$file"
+  stop_x
+}
+
+files=(
+  "$out_dir/$name.png"
+  "$out_dir/$name-widgets.png"
+  "$out_dir/$name-widgets-gtk4.png"
+)
+
 shot_showcase
 shot_factory gtk3-widget-factory "$out_dir/$name-widgets.png"
 shot_factory gtk4-widget-factory "$out_dir/$name-widgets-gtk4.png"
+
+if [ -n "$demo_dir" ]; then
+  mkdir -p "$demo_dir"
+  shot_demo gtk3-demo "$demo_dir/$demo-gtk3.png"
+  shot_demo gtk4-demo "$demo_dir/$demo-gtk4.png"
+  files+=("$demo_dir/$demo-gtk3.png" "$demo_dir/$demo-gtk4.png")
+fi
 
 # The screenshots come from a screen with an alpha channel and an offset that
 # no one needs. The date chunk goes out too: without it, the same screen gives
 # the same file on each build.
 magick mogrify -alpha off -colorspace sRGB +repage -strip \
-  -define png:exclude-chunks=date \
-  "$out_dir/$name.png" "$out_dir/$name-widgets.png" \
-  "$out_dir/$name-widgets-gtk4.png"
+  -define png:exclude-chunks=date "${files[@]}"
 
 echo "screenshot.sh: wrote the screenshots of $name in $out_dir"

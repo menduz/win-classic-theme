@@ -16,7 +16,7 @@ nix develop
 | --------------------------- | ------------------------------------------------ |
 | `nix build .#<preset>`      | build one scheme, for example `.#luna`           |
 | `nix build .#screenshots`   | make the screenshots in the sandbox              |
-| `update-screenshots`        | make them and copy them to `screenshots/`        |
+| `update-screenshots`        | make them and copy them to `screenshots/` and `demos/` |
 | `preview-theme <preset>`    | open the showcase window with a scheme, on your own display |
 | `win-classic-screenshot`    | the screenshot script, on a theme that is already built |
 | `nix fmt`                   | format the Nix files                             |
@@ -91,6 +91,11 @@ above the list on the left. Thus it hides no important widget.
 ![The showcase window with the windows-standard scheme](screenshots/win-classic-standard.png)
 
 ![The showcase window with the dark scheme](screenshots/win-classic-dark.png)
+
+`demos/` holds the window of one demo of each toolkit, from
+`gtk3-demo --run=builder` and `gtk4-demo --run=builder`. The script takes those
+two with the `windows-standard` scheme, which AGENTS.md asks for. `demo` in
+`dev/screenshot.sh` holds the name of the demo.
 
 To add a scheme to `screenshots/`, add its preset to `shown` in `flake.nix`.
 Then run `update-screenshots`.

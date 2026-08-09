@@ -28,6 +28,9 @@
   librsvg,
   liberation_ttf,
   themes,
+
+  # The scheme of the screenshots of the demos. AGENTS.md asks for this one.
+  demoTheme ? "win-classic-standard",
 }:
 let
   # The window with one widget of each kind. The screenshot script starts it.
@@ -88,7 +91,9 @@ let
   };
 
   shots = lib.mapAttrsToList (
-    name: theme: ''win-classic-screenshot ${theme}/share/themes/${name} ${name} "$out"''
+    name: theme:
+    ''win-classic-screenshot ${theme}/share/themes/${name} ${name} "$out"''
+    + lib.optionalString (name == demoTheme) " \"$out/demos\""
   ) themes;
 in
 {
@@ -119,10 +124,11 @@ in
         echo "Git tracks, so a new file needs 'git add' first." >&2
         exit 1
       fi
-      mkdir -p screenshots
+      mkdir -p screenshots demos
       install -m 644 "$out"/*.png screenshots/
+      install -m 644 "$out"/demos/*.png demos/
       echo "update-screenshots: wrote"
-      ls -1 screenshots/
+      ls -1 screenshots/ demos/
     '';
   };
 }
