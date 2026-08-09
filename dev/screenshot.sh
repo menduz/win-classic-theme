@@ -10,10 +10,11 @@
 # The script needs Xvfb, Xfwm4, dbus, ImageMagick, `showcase` and
 # `gtk3-widget-factory` in PATH. `dev/screenshots.nix` gives them.
 #
-# It writes two files in the output directory:
+# It writes three files in the output directory:
 #
-#     <name>.png          a desktop with two windows and an open menu
-#     <name>-widgets.png  the window of gtk3-widget-factory
+#     <name>.png               a desktop with two windows and an open menu
+#     <name>-widgets.png       the window of gtk3-widget-factory
+#     <name>-widgets-gtk4.png  the window of gtk4-widget-factory
 
 set -euo pipefail
 
@@ -92,6 +93,15 @@ cat >"$XDG_CONFIG_HOME/gtk-4.0/gtk.css" <<CSS
 @import url("file://$theme_dir/gtk-4.0/gtk.css");
 CSS
 
+cat >"$XDG_CONFIG_HOME/gtk-4.0/settings.ini" <<INI
+[Settings]
+gtk-icon-theme-name=Adwaita
+gtk-font-name=Liberation Sans 9
+gtk-enable-animations=false
+gtk-cursor-blink=false
+gtk-hint-font-metrics=1
+INI
+
 cat >"$XDG_CONFIG_HOME/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml" <<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <channel name="xfwm4" version="1.0">
@@ -113,6 +123,16 @@ export GTK_THEME=$name
 export GTK_A11Y=none
 export GTK_USE_PORTAL=0
 export NO_AT_BRIDGE=1
+
+# GTK4 looks for a Vulkan or an OpenGL device. The X server of this script has
+# none, and the driver stops the application in the Nix sandbox. The cairo
+# renderer draws with the processor and needs no device. GTK3 reads neither
+# name.
+export GSK_RENDERER=cairo
+export GDK_DISABLE=gl,vulkan
+# gtk4-widget-factory has a video widget, and GTK4 stops when it does not find
+# the GStreamer elements. No screenshot here shows a film.
+export GTK_MEDIA=none
 
 # Xfwm4 keeps its settings in Xfconf, and Xfconf needs a session bus. The bus
 # starts here, after the home directory above, because the bus gives its own
@@ -203,34 +223,40 @@ shot_showcase() {
   stop_x
 }
 
-# The window of gtk3-widget-factory, which holds one widget of every kind.
-shot_widgets() {
+# The window of a widget factory, which holds one widget of every kind. The
+# window draws its own frame, so the picture holds the window alone.
+#
+#     shot_factory <program> <output file>
+shot_factory() {
+  local program=$1 file=$2 id
+
   start_x 1400x820
   start_wm
 
-  gtk3-widget-factory >"$work/factory.log" 2>&1 &
+  "$program" >"$work/$program.log" 2>&1 &
   app_pid=$!
   # The window manager gives the focus to the window it maps, and the window
   # of the application is the only one here.
   wait_for xdotool getactivewindow
   sleep 3 # the window draws its pages
 
-  local id
   id=$(xdotool getactivewindow)
   xdotool windowmove "$id" 0 0
   sleep 1
-  magick import -window "$id" -screen "$out_dir/$name-widgets.png"
+  magick import -window "$id" -screen "$file"
   stop_x
 }
 
 shot_showcase
-shot_widgets
+shot_factory gtk3-widget-factory "$out_dir/$name-widgets.png"
+shot_factory gtk4-widget-factory "$out_dir/$name-widgets-gtk4.png"
 
 # The screenshots come from a screen with an alpha channel and an offset that
 # no one needs. The date chunk goes out too: without it, the same screen gives
 # the same file on each build.
 magick mogrify -alpha off -colorspace sRGB +repage -strip \
   -define png:exclude-chunks=date \
-  "$out_dir/$name.png" "$out_dir/$name-widgets.png"
+  "$out_dir/$name.png" "$out_dir/$name-widgets.png" \
+  "$out_dir/$name-widgets-gtk4.png"
 
-echo "screenshot.sh: wrote $out_dir/$name.png and $out_dir/$name-widgets.png"
+echo "screenshot.sh: wrote the screenshots of $name in $out_dir"

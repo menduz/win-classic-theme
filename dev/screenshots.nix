@@ -15,6 +15,7 @@
   pkg-config,
   glib,
   gtk3,
+  gtk4,
   dbus,
   xvfb,
   xfwm4,
@@ -24,6 +25,7 @@
   xdotool,
   imagemagick,
   adwaita-icon-theme,
+  librsvg,
   liberation_ttf,
   themes,
 }:
@@ -62,6 +64,7 @@ let
       imagemagick
       showcase
       gtk3.dev # gtk3-widget-factory
+      gtk4.dev # gtk4-widget-factory
     ];
     text = ''
       # Xfconf puts its D-Bus service file below share/, and GTK finds the
@@ -71,9 +74,13 @@ let
           "${xfconf}/share"
           "${adwaita-icon-theme}/share"
           (glib.getSchemaDataDirPath gtk3)
+          (glib.getSchemaDataDirPath gtk4)
         ]
       }
-      export GSETTINGS_SCHEMA_DIR=${glib.getSchemaPath gtk3}
+      export GSETTINGS_SCHEMA_DIR=${glib.getSchemaPath gtk3}:${glib.getSchemaPath gtk4}
+      # The icon of gtk4-widget-factory is an SVG file, and gdk-pixbuf reads
+      # SVG with the loader of librsvg.
+      export GDK_PIXBUF_MODULE_FILE=${librsvg}/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
       export FONTCONFIG_FILE=${fontsConf}
       export DBUS_SESSION_CONF=${dbus}/share/dbus-1/session.conf
       exec bash ${./screenshot.sh} "$@"
