@@ -3,31 +3,33 @@
  ****************/
 
 spinbutton {
-    padding: 1px;
-    border-top: 1px solid @dark_shadow;
-    border-left: 1px solid @dark_shadow;
-    border-bottom: 1px solid @light_shadow;
-    border-right: 1px solid @light_shadow;
-    border-radius: 0px;
-    background-color: @base_color;
-    color: @text_color; }
-  
-
-spinbutton text {	
-	background-color: @theme_base_color;
-	color: @fg_color;
-    padding: 4px;
+  padding: 1px;
+  border-top: 1px solid @dark_shadow;
+  border-left: 1px solid @dark_shadow;
+  border-bottom: 1px solid @light_shadow;
+  border-right: 1px solid @light_shadow;
+  border-radius: 0px;
+  background-color: @base_color;
+  color: @text_color;
 }
 
+spinbutton text {
+  background-color: @theme_base_color;
+  color: @fg_color;
+  padding: 4px;
+}
 
 /* GTK4 keeps the node at 16px. This draws the 15px image at its own size. */
 
-check, radio {
-   -gtk-icon-size: 15px; }
-
+check,
+radio {
+  -gtk-icon-size: 15px;
+}
 
 /* GTK4 draws a background image at the size of the node. This draws the
    arrows at the size of the image. */
 
-spinbutton.horizontal > button.down, spinbutton.horizontal > button.up {
-   background-size: auto; }
+spinbutton.horizontal > button.down,
+spinbutton.horizontal > button.up {
+  background-size: auto;
+}

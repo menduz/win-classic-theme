@@ -3,11 +3,11 @@
  *********/
 
 menubar {
-    padding: 2px;
+  padding: 2px;
 }
 
 menubar item label {
-    margin: .4em;
+  margin: 0.4em;
 }
 
 /***********
@@ -24,12 +24,13 @@ popover.menu,
 .csd popover,
 .csd popover.background,
 .csd popover.menu {
-    margin: 0;
-    padding: 0;
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
-    background-color: transparent; }
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background-color: transparent;
+}
 
 /* Raised frame, with the same edges as the GTK3 `menu` node.
 
@@ -40,36 +41,42 @@ popover.menu,
 
 popover > contents,
 .csd popover > contents {
-    margin: 0;
-    padding: 2px 1px;
-    border-radius: 0;
-    border-top: 1px solid @bg_color;
-    border-left: 1px solid @bg_color;
-    border-bottom: 1px solid @borders;
-    border-right: 1px solid @borders;
-    box-shadow: inset 1px 1px @light_shadow, inset -1px -1px @dark_shadow;
-    background-color: @bg_color;
-    color: @fg_color; }
+  margin: 0;
+  padding: 2px 1px;
+  border-radius: 0;
+  border-top: 1px solid @bg_color;
+  border-left: 1px solid @bg_color;
+  border-bottom: 1px solid @borders;
+  border-right: 1px solid @borders;
+  box-shadow:
+    inset 1px 1px @light_shadow,
+    inset -1px -1px @dark_shadow;
+  background-color: @bg_color;
+  color: @fg_color;
+}
 
 popover > arrow,
 .csd popover > arrow {
-    border: 1px solid @borders;
-    border-radius: 0;
-    box-shadow: none;
-    background-color: @bg_color; }
+  border: 1px solid @borders;
+  border-radius: 0;
+  box-shadow: none;
+  background-color: @bg_color;
+}
 
 /* A long menu scrolls. Keep the scroller transparent to show the frame. */
 
 popover.menu > contents > scrolledwindow,
 popover.menu > contents > scrolledwindow > viewport,
 popover.menu > contents viewport {
-    border: none;
-    box-shadow: none;
-    background-color: transparent; }
+  border: none;
+  box-shadow: none;
+  background-color: transparent;
+}
 
 popover.menu > contents > stack > box,
 popover.menu > contents > scrolledwindow > viewport > stack > box {
-    padding: 0; }
+  padding: 0;
+}
 
 /**************
  * Menu items *
@@ -82,60 +89,68 @@ popover.menu > contents > scrolledwindow > viewport > stack > box {
    `contents` keeps the 3D edges visible. */
 
 popover.menu modelbutton {
-    min-height: 0;
-    min-width: 0;
-    padding: 4px 0;
-    border-radius: 0;
-    background-color: transparent;
-    color: @fg_color; }
+  min-height: 0;
+  min-width: 0;
+  padding: 4px 0;
+  border-radius: 0;
+  background-color: transparent;
+  color: @fg_color;
+}
 
 popover.menu modelbutton:hover,
 popover.menu modelbutton:selected {
-    background-color: @theme_selected_bg_color;
-    color: @theme_selected_fg_color; }
+  background-color: @theme_selected_bg_color;
+  color: @theme_selected_fg_color;
+}
 
 popover.menu modelbutton:disabled {
-    color: @disabled_fg_color;
-    text-shadow: 1px 1px @light_shadow; }
+  color: @disabled_fg_color;
+  text-shadow: 1px 1px @light_shadow;
+}
 
 popover.menu accelerator {
-    color: alpha(currentColor, 0.55); }
+  color: alpha(currentColor, 0.55);
+}
 
 popover.menu label.title {
-    font-weight: bold;
-    padding: 4px 0; }
+  font-weight: bold;
+  padding: 4px 0;
+}
 
 /* GTK4 dims arrows to 30%, which hides them on the dark background. */
 
 popover.menu modelbutton arrow,
 popover.menu modelbutton arrow:hover {
-    opacity: 1;
-    background: none;
-    min-width: 17px;
-    min-height: 17px;
-    -gtk-icon-size: 17px; }
+  opacity: 1;
+  background: none;
+  min-width: 17px;
+  min-height: 17px;
+  -gtk-icon-size: 17px;
+}
 
 /* The negative margins were for the 6px side padding of the item. The item now
    has 2px, so the arrow needs no pull to reach the edge of the menu. */
 
 popover.menu modelbutton arrow.right {
-    margin-left: 10px;
-    margin-right: 0;
-    -gtk-icon-source: url("../gtk-3.0/assets/arrow_right.png"); }
+  margin-left: 10px;
+  margin-right: 0;
+  -gtk-icon-source: url("../gtk-3.0/assets/arrow_right.png");
+}
 
 popover.menu modelbutton arrow.left {
-    margin-left: 0;
-    margin-right: 10px;
-    -gtk-icon-source: url("../gtk-3.0/assets/arrow_left.png"); }
+  margin-left: 0;
+  margin-right: 10px;
+  -gtk-icon-source: url("../gtk-3.0/assets/arrow_left.png");
+}
 
 /* The line goes from one 3D edge of the menu to the other, as in Windows */
 
 popover.background separator,
-popover.menu separator  {
-    border-left-width: 0px;
-	border-right-width: 0px;
-	margin-right: 0;
-	margin-left: 0;
-	margin-top: 0px;
-    margin-bottom: 1px;
+popover.menu separator {
+  border-left-width: 0px;
+  border-right-width: 0px;
+  margin-right: 0;
+  margin-left: 0;
+  margin-top: 0px;
+  margin-bottom: 1px;
 }

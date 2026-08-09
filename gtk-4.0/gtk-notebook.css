@@ -4,19 +4,25 @@
    user selects covers it. */
 
 notebook.frame > header.top ~ stack {
-   border-top-color: transparent; }
+  border-top-color: transparent;
+}
 
 notebook.frame > header.left ~ stack {
-   border-left-color: transparent; }
+  border-left-color: transparent;
+}
 
 notebook.frame > header.top > tabs {
-   box-shadow: inset 0 -1px @light_shadow; }
+  box-shadow: inset 0 -1px @light_shadow;
+}
 
 notebook.frame > header.left > tabs {
-   box-shadow: inset -1px 0 @light_shadow; }
+  box-shadow: inset -1px 0 @light_shadow;
+}
 
 notebook.frame > header.top > tabs > tab:not(:checked) {
-   margin-bottom: 1px; }
+  margin-bottom: 1px;
+}
 
 notebook.frame > header.left > tabs > tab:not(:checked) {
-   margin-right: 1px; }
+  margin-right: 1px;
+}
