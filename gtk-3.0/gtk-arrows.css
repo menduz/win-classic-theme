@@ -57,16 +57,20 @@ spinbutton.horizontal > button.down {
   color: transparent;
   background-image: url("assets/arrow_down.png");
   background-position: center;
-  min-height: 14px;
-  min-width: 14px;
+  /* The box takes the size of the image, thus the center is a whole pixel. */
+  padding: 0;
+  min-height: 17px;
+  min-width: 17px;
 }
 
 spinbutton.horizontal > button.up {
   color: transparent;
   background-image: url("assets/arrow_up.png");
   background-position: center;
-  min-height: 14px;
-  min-width: 14px;
+  /* The box takes the size of the image, thus the center is a whole pixel. */
+  padding: 0;
+  min-height: 17px;
+  min-width: 17px;
 }
 
 /* Menu arrows */
