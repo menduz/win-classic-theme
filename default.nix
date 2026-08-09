@@ -245,6 +245,7 @@ stdenv.mkDerivation {
         ".git"
         ".gitignore"
         "DEVELOPMENT.md"
+        "bugs"
         "dev"
         "flake.lock"
         "flake.nix"
