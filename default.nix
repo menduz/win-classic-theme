@@ -411,6 +411,44 @@ stdenv.mkDerivation {
     runHook postInstall
   '';
 
+  # Every `url()` of a style sheet must point to a file, and no `@name@` token
+  # may stay in the result. A relative URL takes the directory of its own
+  # style sheet, thus a rule that moves from gtk-3.0/ to gtk-4.0/ loses its
+  # images without a word.
+  doInstallCheck = true;
+  installCheckPhase = ''
+    runHook preInstallCheck
+
+    theme=$out/share/themes/${name}
+    bad=0
+
+    while read -r css; do
+      dir=$(dirname "$css")
+      while read -r ref; do
+        case "$ref" in
+          "" | resource:* | http:* | https:*) continue ;;
+        esac
+        if [ ! -e "$dir/$ref" ]; then
+          echo "$css: url(\"$ref\") points to no file" >&2
+          bad=1
+        fi
+      done < <(grep -o 'url("[^"]*")' "$css" | sed 's|url("||; s|")$||')
+    done < <(find "$theme" -name '*.css')
+
+    for token in ${lib.concatStringsSep " " (lib.attrNames tokens)}; do
+      if grep -rln "@$token@" "$theme"; then
+        echo "the token @$token@ stayed in the result" >&2
+        bad=1
+      fi
+    done
+
+    if [ "$bad" -ne 0 ]; then
+      exit 1
+    fi
+
+    runHook postInstallCheck
+  '';
+
   passthru = { inherit decorationLayout presets; };
 
   meta = {
