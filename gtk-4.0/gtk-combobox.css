@@ -4,3 +4,9 @@ combobox button:checked box {
   margin: 0px;
   margin-left: -1px;
 }
+
+/* The caret sits in the middle slice, which GTK4 stretches. A tile keeps the
+   pixels of the image. */
+combobox button {
+  border-image-repeat: stretch repeat;
+}
