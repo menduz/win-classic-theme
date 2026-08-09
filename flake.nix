@@ -76,14 +76,38 @@
       );
 
       # `nix flake check` reads the style sheets with the parser of GTK.
-      checks = forEachSystem (pkgs: {
-        css = pkgs.callPackage ./dev/checks.nix {
-          theme = self.packages.${pkgs.system}.windows-standard;
-          themeName = themeName "windows-standard";
-        };
-      });
+      # `callPackage` puts `override` beside the checks, and that one is no
+      # derivation.
+      checks = forEachSystem (
+        pkgs:
+        lib.filterAttrs (_: lib.isDerivation) (
+          pkgs.callPackage ./dev/checks.nix {
+            theme = self.packages.${pkgs.system}.windows-standard;
+            themeName = themeName "windows-standard";
+          }
+        )
+      );
 
-      formatter = forEachSystem (pkgs: pkgs.nixfmt-tree);
+      # `nix fmt` gives its shape to a Nix file and to a style sheet.
+      formatter = forEachSystem (
+        pkgs:
+        pkgs.writeShellApplication {
+          name = "win-classic-fmt";
+          runtimeInputs = [
+            pkgs.nixfmt-rfc-style
+            pkgs.prettier
+            pkgs.findutils
+          ];
+          text = ''
+            if [ "$#" -eq 0 ]; then
+              set -- .
+            fi
+            find "$@" -name '*.nix' -not -path '*/.git/*' -exec nixfmt {} +
+            find "$@" -name '*.css' -not -path '*/.git/*' \
+              -exec prettier --parser css --write {} +
+          '';
+        }
+      );
 
       # `pkgs.win-classic-theme` in another flake. See the README.
       overlays.default = final: prev: {
