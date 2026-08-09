@@ -26,8 +26,11 @@ notebook.frame > header.bottom {
    margin-right: 1px;
    margin-top: 0px; }
 
+/* The same top margin as `header.right`. Redmond97 SE gives this one 1px, and
+   the first tab on the left then starts one pixel below the frame of the
+   page. */
 notebook.frame > header.left {
-   margin-top: 1px;
+   margin-top: 0px;
    margin-right: 0px; }
       
 notebook.frame > header.right {

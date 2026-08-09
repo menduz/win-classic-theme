@@ -5,13 +5,13 @@ button {
    padding: 4px 6px 4px 6px;
    border-radius: 0px;
    color: @button_fg_color;
-   border-top: 1px solid @button_bg_color;
-   border-left: 1px solid @button_bg_color;
+   border-top: 1px solid @light_shadow;
+   border-left: 1px solid @light_shadow;
    border-right: 1px solid @borders;
    border-bottom: 1px solid @borders;
    border-radius: 0px;
    background-color: @button_bg_color;
-   box-shadow: inset -1px 0 @dark_shadow, inset 0 -1px @dark_shadow, inset 1px 0 @light_shadow, inset 0 1px @light_shadow;
+   box-shadow: inset -1px 0 @dark_shadow, inset 0 -1px @dark_shadow;
    outline-offset: -4px; }
 
 button:active {
