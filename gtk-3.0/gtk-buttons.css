@@ -398,6 +398,8 @@ popover modelbutton {
 
 
 check, radio, check:disabled, radio:disabled {
+   min-width: 15px;
+   min-height: 15px;
    margin: 4px;
    border-style: none;
    background-color: transparent; }
@@ -444,8 +446,8 @@ radio:indeterminate:disabled, .radio:indeterminate:disabled {
    -gtk-icon-source: url("assets/radio_ins_mixed.png"); }
 
 menuitem check, menuitem radio {
-   min-height: 16px;
-   min-width: 16px; }
+   min-height: 15px;
+   min-width: 15px; }
 
 view.content-view check:hover, view.content-view check:disabled, view.content-view check:selected {
    background-color: transparent; }

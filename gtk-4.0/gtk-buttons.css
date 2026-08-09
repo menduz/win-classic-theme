@@ -18,3 +18,9 @@ spinbutton text {
 	color: @fg_color;
     padding: 4px;
 }
+
+
+/* GTK4 keeps the node at 16px. This draws the 15px image at its own size. */
+
+check, radio {
+   -gtk-icon-size: 15px; }
