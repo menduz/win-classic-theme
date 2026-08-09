@@ -12,6 +12,10 @@ frame  {
   box-shadow: 1px 1px @light_shadow inset, -1px -1px @dark_shadow inset; } 
 
 
+frame > label {
+  margin-left: 6px; }
+
+
 /* Status bar border */
 
 
