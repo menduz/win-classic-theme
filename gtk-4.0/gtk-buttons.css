@@ -13,10 +13,13 @@ spinbutton {
   color: @text_color;
 }
 
+/* A transparent text box lets the frame of the spin button show, as in GTK3.
+   GTK4 makes the text one pixel taller, thus one pixel less at the bottom
+   gives the spin button the height of an entry. */
 spinbutton text {
-  background-color: @theme_base_color;
+  background-color: transparent;
   color: @fg_color;
-  padding: 4px;
+  padding: 3px 3px 2px 3px;
 }
 
 /* GTK4 keeps the node at 16px. This draws the 15px image at its own size. */
