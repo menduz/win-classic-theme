@@ -1,0 +1,96 @@
+name: Build and release
+
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  variants:
+    name: Find variants
+    runs-on: ubuntu-24.04
+    outputs:
+      variants: ${{ steps.variants.outputs.variants }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: cachix/install-nix-action@v31
+      - id: variants
+        name: Read variants
+        run: |
+          variants="$(nix eval --json --file presets.nix --apply builtins.attrNames)"
+          echo "variants=$variants" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build ${{ matrix.variant }}
+    needs: variants
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: ${{ fromJSON(needs.variants.outputs.variants) }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: cachix/install-nix-action@v31
+      - id: build
+        name: Build
+        env:
+          VARIANT: ${{ matrix.variant }}
+        run: |
+          output_path="$(nix build ".#$VARIANT" --no-link --print-out-paths)"
+          package="$(nix eval --raw ".#$VARIANT.name")"
+
+          echo "output_path=$output_path" >> "$GITHUB_OUTPUT"
+          echo "package=$package" >> "$GITHUB_OUTPUT"
+      - name: Archive
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          OUTPUT_PATH: ${{ steps.build.outputs.output_path }}
+          PACKAGE: ${{ steps.build.outputs.package }}
+        run: |
+          archive="$GITHUB_WORKSPACE/archives/$PACKAGE.zip"
+          zip="$(nix build --inputs-from . nixpkgs#zip --no-link --print-out-paths)/bin/zip"
+
+          mkdir -p "$(dirname "$archive")"
+          cd "$OUTPUT_PATH"
+          "$zip" -q -r "$archive" .
+      - name: Upload archive
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v7
+        with:
+          name: archive-${{ matrix.variant }}
+          path: archives/*.zip
+          compression-level: 0
+          if-no-files-found: error
+
+  release:
+    name: Upload release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Download archives
+        uses: actions/download-artifact@v8
+        with:
+          pattern: archive-*
+          path: archives
+          merge-multiple: true
+      - name: Create or update release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mapfile -t archives < <(find archives -maxdepth 1 -type f -name '*.zip' -print | sort)
+          if [ "${#archives[@]}" -eq 0 ]; then
+            echo "No archives were downloaded." >&2
+            exit 1
+          fi
+
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "${archives[@]}" \
+              --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$GITHUB_REF_NAME" "${archives[@]}" \
+              --generate-notes --verify-tag --repo "$GITHUB_REPOSITORY"
+          fi
