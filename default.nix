@@ -60,7 +60,6 @@ let
     # that color.
     highlightMultiplier = 1.3;
     shadowMultiplier = 0.7;
-    disabledFgMultiplier = 0.8;
 
     # Amount of each channel to add to the calculated edges. Range -1 to 1.
     highlightGain = [
@@ -147,8 +146,10 @@ let
   # calculates a color that the scheme does not give.
   highlight = cfg.highlight or (edge cfg.highlightMultiplier cfg.highlightGain);
   shadow = cfg.shadow or (edge cfg.shadowMultiplier cfg.shadowGain);
+  # Disabled text sits between the text and the window, thus it stays legible
+  # on a light window and on a dark one.
   disabledfg =
-    cfg.disabledfg or (toColor (map (ch: cap (trunc (ch * cfg.disabledFgMultiplier))) bgRgb));
+    cfg.disabledfg or (toColor (lib.zipListsWith (a: b: (a + b) / 2) (toRgb cfg.fgcolor) bgRgb));
 
   buttons = {
     minimize = true;
