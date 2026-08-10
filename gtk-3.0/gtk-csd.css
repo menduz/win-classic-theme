@@ -137,12 +137,11 @@ tooltip.background decoration {
   border-radius: 0;
 }
 
-/* The border is on the decoration. This node holds the inset 3D edge and the
-   space above and below the items. */
+/* The border is on the decoration. This node holds the inset 3D edge. */
 .csd menu {
   border: none;
   margin: 0px;
-  padding: 4px 1px;
+  padding: 1px;
   box-shadow:
     inset 1px 1px @light_shadow,
     inset -1px -1px @dark_shadow;

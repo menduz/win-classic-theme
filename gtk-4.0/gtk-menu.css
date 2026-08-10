@@ -34,15 +34,15 @@ popover.menu,
 
 /* Raised frame, with the same edges as the GTK3 `menu` node.
 
-   The side padding is 1px, the width of the inset 3D edge. A larger value puts
-   a line of face color between the edge and the item, and the selection bar
-   then floats in the menu. GTK4 gives `contents` a margin of its own. Remove
-   it, or the menu gets one more line on the four sides. */
+   The padding is 1px, the width of the inset 3D edge. A larger value puts a
+   line of face color between the edge and the item, and the selection bar then
+   floats in the menu. GTK4 gives `contents` a margin of its own. Remove it, or
+   the menu gets one more line on the four sides. */
 
 popover > contents,
 .csd popover > contents {
   margin: 0;
-  padding: 2px 1px;
+  padding: 1px;
   border-radius: 0;
   border-top: 1px solid @bg_color;
   border-left: 1px solid @bg_color;
