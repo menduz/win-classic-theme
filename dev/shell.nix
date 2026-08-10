@@ -6,6 +6,7 @@
   imagemagick,
   nixfmt-rfc-style,
   gtk3,
+  gtk4,
   screenshot,
   showcase,
   update-screenshots,
@@ -19,6 +20,7 @@ let
     runtimeInputs = [
       showcase
       gtk3.dev # gtk3-widget-factory
+      gtk4.dev # gtk3-widget-factory
     ];
     text = ''
       preset=''${1:-dark}
@@ -30,6 +32,7 @@ let
       export XDG_DATA_DIRS="$theme/share''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
       export GTK_THEME=$name
       export GTK2_RC_FILES="$theme/share/themes/$name/gtk-2.0/gtkrc"
+      export GTK_DEBUG=interactive
 
       echo "preview-theme: $name from the preset $preset"
       if [ $# -gt 0 ]; then
@@ -45,6 +48,7 @@ mkShell {
     imagemagick # the theme build paints the images with it
     nixfmt-rfc-style
     gtk3.dev # gtk3-widget-factory, gtk3-demo, gtk-builder-tool
+    gtk4.dev
     preview
     screenshot
     showcase
