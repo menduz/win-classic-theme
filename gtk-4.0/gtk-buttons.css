@@ -32,7 +32,4 @@ radio {
 spinbutton.horizontal > button.down,
 spinbutton.horizontal > button.up {
   background-size: auto;
-  /* GTK4 makes the button taller than the image, and the middle of the box
-     falls on a half pixel. The top edge is a whole one. */
-  background-position: center top;
 }

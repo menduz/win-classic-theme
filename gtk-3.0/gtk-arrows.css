@@ -58,11 +58,14 @@ combobox button:checked arrow {
 
 /* Spin button arrows */
 
+/* A button gets the height of the entry, thus the box is taller than the
+   image and the middle of the box can fall on a half pixel. A distance from
+   the top edge is a whole pixel at every height. */
+
 spinbutton.horizontal > button.down {
   color: transparent;
   background-image: url("assets/arrow_down.png");
-  background-position: center;
-  /* The box takes the size of the image, thus the center is a whole pixel. */
+  background-position: center 1px;
   padding: 0;
   min-height: 17px;
   min-width: 17px;
@@ -71,8 +74,7 @@ spinbutton.horizontal > button.down {
 spinbutton.horizontal > button.up {
   color: transparent;
   background-image: url("assets/arrow_up.png");
-  background-position: center;
-  /* The box takes the size of the image, thus the center is a whole pixel. */
+  background-position: center 1px;
   padding: 0;
   min-height: 17px;
   min-width: 17px;
