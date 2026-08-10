@@ -3,10 +3,17 @@
  ***************/
 
 /*Headers*/
+/* Windows paints the bar of an active window from the title color on the left
+   to the second title color on the right. */
 headerbar {
   margin-top: 64px;
   margin-bottom: 64px;
   background-color: @wm_active_title;
+  background-image: linear-gradient(
+    to right,
+    @active_title_color,
+    @active_title_color1
+  );
   color: @wm_active_title_text;
   margin: 0px;
   padding: 0px;
@@ -32,6 +39,7 @@ headerbar:backdrop {
   margin-top: -64px;
   margin-bottom: -64px;
   background-color: @wm_inactive_title;
+  background-image: none;
   color: @wm_inactive_title_text;
   margin: 0px;
   padding: 0px;
@@ -41,14 +49,14 @@ headerbar:backdrop {
 
 headerbar > windowhandle > box > label {
   color: @headerbar_fg_color;
-  background-color: @headerbar_bg_color;
+  background-color: transparent;
   box-shadow: none;
 }
 
 /*Fix headerbar title colors to match Xfwm4/Metacity Active/Inactive colors*/
 window.background.csd headerbar label.title,
 window.background.solid-csd headerbar label.title {
-  background-color: @wm_active_title;
+  background-color: transparent;
   color: @wm_active_title_text;
   margin-top: 4px;
   font-size: 9pt;
@@ -57,7 +65,7 @@ window.background.solid-csd headerbar label.title {
 
 window.background.csd headerbar label.subtitle,
 window.background.solid-csd headerbar label.subtitle {
-  background-color: @wm_active_title;
+  background-color: transparent;
   color: @wm_active_title_text;
   margin-bottom: 4px;
   font-size: 6pt;
@@ -66,7 +74,7 @@ window.background.solid-csd headerbar label.subtitle {
 
 window.background.csd headerbar:backdrop label.title,
 window.background.solid-csd headerbar:backdrop label.title {
-  background-color: @wm_inactive_title;
+  background-color: transparent;
   color: @wm_inactive_title_text;
   margin-top: 4px;
   font-size: 9pt;
@@ -75,7 +83,7 @@ window.background.solid-csd headerbar:backdrop label.title {
 
 window.background.csd headerbar:backdrop label.subtitle,
 window.background.solid-csd headerbar:backdrop label.subtitle {
-  background-color: @wm_inactive_title;
+  background-color: transparent;
   color: @wm_active_title_text;
   margin-bottom: 4px;
   font-size: 6pt;
