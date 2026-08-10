@@ -39,11 +39,13 @@ popover.background.touch-selection,
 
    The item has no side margin. Windows draws the selection bar on the full
    width of the menu, from one 3D edge to the other. The 2px side padding of
-   the `menu` node keeps the edges visible. */
+   the `menu` node keeps the edges visible. The side padding of the item holds
+   the label and the accelerator away from the edges, and the bar keeps the
+   full width. */
 
 menu menuitem {
   margin: 0;
-  padding: 4px 0;
+  padding: 4px 6px;
 }
 
 combobox menuitem,

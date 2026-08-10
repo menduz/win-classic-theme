@@ -91,7 +91,7 @@ popover.menu > contents > scrolledwindow > viewport > stack > box {
 popover.menu modelbutton {
   min-height: 0;
   min-width: 0;
-  padding: 4px 0;
+  padding: 4px 6px;
   border-radius: 0;
   background-color: transparent;
   color: @fg_color;
@@ -128,8 +128,8 @@ popover.menu modelbutton arrow:hover {
   -gtk-icon-size: 17px;
 }
 
-/* The negative margins were for the 6px side padding of the item. The item now
-   has 2px, so the arrow needs no pull to reach the edge of the menu. */
+/* The side padding of the item holds the arrow away from the edge, as it holds
+   the accelerator. */
 
 popover.menu modelbutton arrow.right {
   margin-left: 10px;
