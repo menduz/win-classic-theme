@@ -1,12 +1,5 @@
-/*Dimensions work fine in GTK3, but not 4. Hacky workaround*/
-combobox button:active box,
-combobox button:checked box {
-  margin: 0px;
-  margin-left: -1px;
-}
-
-/* The button of GTK4 is one pixel taller than the button of GTK3. One row
-   less in the bottom slice gives the middle slice the height of the button. */
-combobox button {
-  border-image-slice: 2 18 1 2;
+/* GTK4 gives an arrow node the icon size of 16px. The caret image is 15px
+   wide, thus the box of the icon takes the width of the image. */
+combobox arrow {
+  -gtk-icon-size: 15px;
 }

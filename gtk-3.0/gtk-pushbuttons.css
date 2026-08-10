@@ -31,6 +31,13 @@ button.flat.image-button:checked:disabled > * {
   margin-right: -1px;
 }
 
+/* The arrow node draws the drop down button, thus the box holds that button.
+   A press changes the frame of the button and moves nothing. */
+combobox button:active > box,
+combobox button:checked > box {
+  margin: 0px;
+}
+
 /* A text button in a dialog must not move down. GTK does not always subtract
    the negative bottom margin, thus the top margin of 1px makes the button 1px
    taller when you press it. Set both margins to 0. */

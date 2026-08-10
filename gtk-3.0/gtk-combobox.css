@@ -39,19 +39,6 @@ combobox cellview:hover {
   margin-bottom: -2px;
 }
 
-combobox button:checked box {
-  margin: 0;
-  margin-left: -4px;
-  margin-top: 2px;
-  margin-right: -4px;
-  margin-bottom: 2px;
-}
-
 combobox > box {
   margin: -2px;
-}
-
-combobox button:checked box {
-  margin: -1px;
-  margin-left: 0px;
 }

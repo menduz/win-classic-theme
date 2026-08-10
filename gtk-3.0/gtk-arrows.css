@@ -28,27 +28,32 @@ expander arrow:checked {
 }
 
 /* Combobox arrows */
-/* The button image contains the arrow. This lets LibreOffice show dropdown box
-   arrows. `color: transparent` hides only a symbolic icon. Chicago95 gives a
-   normal icon, thus remove the source. */
+/* The arrow node draws the drop down button: the frame comes from CSS and the
+   caret from an icon. The icon has the size of the box, thus GTK does not
+   scale it and the caret keeps its pixels at every size of the combo box. */
 
-combobox arrow,
-combobox arrow:disabled {
-  -gtk-icon-source: none;
-  color: transparent;
-  margin-right: -4px;
-  /*   background-image: url("assets/arrow_down.png");*/
-  background-position: center;
-  min-height: 10px;
-  min-width: 10px;
+combobox arrow {
+  -gtk-icon-source: url("assets/caret_down.png");
+  min-width: 15px;
+  min-height: 17px;
+  border: 1px solid @borders;
+  border-top-color: @button_bg_color;
+  border-left-color: @button_bg_color;
+  box-shadow:
+    inset 1px 1px @light_shadow,
+    inset -1px 0 @dark_shadow,
+    inset 0 -1px @dark_shadow;
+  background-color: @button_bg_color;
 }
 
 combobox arrow:disabled {
-  -gtk-icon-source: none;
-  color: transparent;
-  background-position: center;
-  min-height: 10px;
-  min-width: 10px;
+  -gtk-icon-source: url("assets/caret_down_ins.png");
+}
+
+combobox button:active arrow,
+combobox button:checked arrow {
+  border-color: @dark_shadow;
+  box-shadow: none;
 }
 
 /* Spin button arrows */

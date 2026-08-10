@@ -93,38 +93,19 @@ button.flat:disabled {
 
 /* Combobox button */
 
-combobox button {
-  margin: 2px;
-  box-shadow: none;
-  outline-color: transparent;
-  outline-offset: -1px;
-  background-color: transparent;
-  border: solid;
-  padding: 0px;
-  border-width: 2px 18px 2px 2px;
-  border-image: url("assets/combobox.png");
-  border-image-slice: 2 18 2 2;
-  /* 15px and the two borders give the height of the image, thus the caret in
-     the middle slice keeps its pixels. */
-  min-height: 15px;
-}
+/* The arrow node draws the drop down button, see gtk-arrows.css. */
 
+combobox button,
 combobox button:checked,
-combobox button:active {
+combobox button:active,
+combobox button:disabled {
   margin: 2px;
+  /* The text keeps the distance from the frame that the button image gave. */
+  padding: 0px 0px 0px 2px;
+  border: none;
   box-shadow: none;
   outline-color: transparent;
   outline-offset: -1px;
-  outline-width: 1px;
-  background-color: transparent;
-  border: solid;
-  padding: 0px;
-  border-width: 2px 18px 2px 2px;
-  border-image: url("assets/combobox_checked.png");
-  border-image-slice: 2 18 2 2;
-}
-
-combobox button:disabled {
   background-color: transparent;
 }
 

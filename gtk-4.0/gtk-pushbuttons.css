@@ -28,9 +28,3 @@ grid > box > button:checked > box {
   margin-left: 1px;
   margin-right: -1px;
 }
-
-grid > combobox > box > button:active box,
-grid > combobox > box > button:checked box {
-  margin-bottom: 1px;
-  padding: 1px;
-}

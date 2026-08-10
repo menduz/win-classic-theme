@@ -334,6 +334,11 @@ stdenv.mkDerivation {
       magick "$arrow" -fuzz 15% -fill "$disabledfg" -opaque "$basefg" "''${arrow%.*}_ins.png"
     done
 
+    # The caret of the drop down button. GTK draws an icon at the size of its
+    # box, thus the image has the size of the box that gtk-arrows.css gives.
+    magick arrow_down.png     -crop 15x17+1+0 +repage caret_down.png
+    magick arrow_down_ins.png -crop 15x17+1+0 +repage caret_down_ins.png
+
     for direction in up right down left; do
       magick -background none -page +0+0 scrollbar_button.png \
         -page +0+0 "arrow_$direction.png" -layers flatten "scroll_''${direction}_button.png"
@@ -382,11 +387,8 @@ stdenv.mkDerivation {
     gtk3=../../gtk-3.0/assets
     mkdir -p "$gtk3" ../../gtk-2.0/assets
     cp tab*.png menu_side.png scrollbar_trough.png radio*.png c_box*.png arrow*.png \
-       switch*.png scroll_*_button.png warning.png "$gtk3"/
+       caret*.png switch*.png scroll_*_button.png warning.png "$gtk3"/
     cp menubar.png "$gtk3"/toolbar.png
-    cp comboboxbutton.png "$gtk3"/combobox.png
-    cp comboboxbutton_ins.png "$gtk3"/combobox_disabled.png
-    cp comboboxbutton_checked.png "$gtk3"/combobox_checked.png
     cp close_normal.png close_normal_small.png close_pressed.png close_pressed_small.png \
        maximize_normal.png maximize_pressed.png minimize_normal.png minimize_pressed.png \
        restore_normal.png restore_pressed.png "$gtk3"/
