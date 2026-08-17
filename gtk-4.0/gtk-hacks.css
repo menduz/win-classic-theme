@@ -28,3 +28,15 @@ window.background filechooser gridview * {
 video image.osd {
   color: @theme_selected_fg_color;
 }
+
+entry > text > placeholder {
+  color: @disabled_fg_color;
+}
+
+entry > image.left {
+  padding-right: 0;
+}
+
+entry > image.right {
+  padding-left: 0;
+}
