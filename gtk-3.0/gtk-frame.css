@@ -49,6 +49,7 @@ frame.border-groove > border {
   border-width: 1px;
   border-style: solid;
   border-color: @dark_shadow;
+  box-shadow: none;
   border-radius: 0;
 }
 
