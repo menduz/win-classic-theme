@@ -7,14 +7,16 @@
 # The theme directory is the one that holds `gtk-3.0/` and `xfwm4/`, that is
 # `<store path>/share/themes/<name>`.
 #
-# The script needs Xvfb, Xfwm4, dbus, ImageMagick, `showcase` and
-# `gtk3-widget-factory` in PATH. `dev/screenshots.nix` gives them.
+# The script needs Xvfb, Xfwm4, dbus, ImageMagick and the showcase programs in
+# PATH. `dev/screenshots.nix` gives them.
 #
-# It writes three files in the output directory:
+# It writes five files in the output directory:
 #
 #     <name>.png               a desktop with two windows and an open menu
 #     <name>-widgets.png       the window of gtk3-widget-factory
 #     <name>-widgets-gtk4.png  the window of gtk4-widget-factory
+#     <name>-widgets-qt5.png   the Qt5 widget showcase
+#     <name>-widgets-qt6.png   the Qt6 widget showcase
 #
 # With a fourth argument it writes the window of one demo of each toolkit in
 # that directory:
@@ -133,6 +135,7 @@ cat >"$XDG_CONFIG_HOME/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml" <<XML
 XML
 
 export GTK_THEME=$name
+export GTK2_RC_FILES=$theme_dir/gtk-2.0/gtkrc
 # The theme has no icon of its own, and no application here needs a11y or a
 # portal. Turn both off to keep the log clean and the start fast.
 export GTK_A11Y=none
@@ -238,9 +241,8 @@ shot_showcase() {
   stop_x
 }
 
-# The window of a widget factory, which holds one widget of every kind. The
-# window draws its own frame, so the picture holds the window alone. Both
-# windows take the same size, thus the two pictures compare.
+# A window that holds common widgets. The window draws its own frame, so the
+# picture holds the window alone. Each window has the same size for comparison.
 #
 #     shot_factory <program> <output file>
 shot_factory() {
@@ -289,11 +291,17 @@ files=(
   "$out_dir/$name.png"
   "$out_dir/$name-widgets.png"
   "$out_dir/$name-widgets-gtk4.png"
+  "$out_dir/$name-widgets-qt5.png"
+  "$out_dir/$name-widgets-qt6.png"
 )
 
 shot_showcase
 shot_factory gtk3-widget-factory "$out_dir/$name-widgets.png"
 shot_factory gtk4-widget-factory "$out_dir/$name-widgets-gtk4.png"
+QT_QPA_PLATFORMTHEME=gtk2 QT_STYLE_OVERRIDE=gtk2 \
+  shot_factory qt5-showcase "$out_dir/$name-widgets-qt5.png"
+QT_QPA_PLATFORMTHEME=qt6gtk2 QT_STYLE_OVERRIDE=qt6gtk2 \
+  shot_factory qt6-showcase "$out_dir/$name-widgets-qt6.png"
 
 if [ -n "$demo_dir" ]; then
   mkdir -p "$demo_dir"

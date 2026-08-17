@@ -100,12 +100,16 @@ two with the `windows-standard` scheme, which AGENTS.md asks for. `demo` in
 To add a scheme to `screenshots/`, add its preset to `shown` in `flake.nix`.
 Then run `update-screenshots`.
 
-The other two screenshots hold the window of `gtk3-widget-factory` and the
-window of `gtk4-widget-factory`. GTK4 reads the style sheet from
+For each scheme, two screenshots show `gtk3-widget-factory` and
+`gtk4-widget-factory`. GTK4 reads the style sheet from
 `gtk-4.0/gtk.css` in the configuration directory, and the script writes that
 file. GTK4 also looks for a Vulkan device and for the GStreamer elements of
 its video widget. The X server of the script has neither, so the script asks
 for the cairo renderer and for no media backend.
+
+For each scheme, two more screenshots show `dev/qt-showcase.cpp`, built with
+Qt5 and Qt6. The Qt5 program uses `qtstyleplugins`, and the Qt6 program uses
+`qt6gtk2`. Both plugins read the GTK2 style sheet of the built theme.
 
 The showcase screenshot is the same on every build. The screenshots of the two
 widget factories are not the same. Those programs move a progress bar on a

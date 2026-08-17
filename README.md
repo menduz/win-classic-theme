@@ -15,6 +15,10 @@ A Windows 9x theme for GTK2, GTK3, GTK4 and Xfwm4. It is a Nix build of
 
 ![The GTK4 widgets of the windows-standard scheme](screenshots/win-classic-standard-widgets-gtk4.png)
 
+![The Qt5 widgets of the windows-standard scheme](screenshots/win-classic-standard-widgets-qt5.png)
+
+![The Qt6 widgets of the windows-standard scheme](screenshots/win-classic-standard-widgets-qt6.png)
+
 ### `dark`
 
 ![](screenshots/win-classic-dark.png)
@@ -22,6 +26,10 @@ A Windows 9x theme for GTK2, GTK3, GTK4 and Xfwm4. It is a Nix build of
 ![The GTK3 widgets of the dark scheme](screenshots/win-classic-dark-widgets.png)
 
 ![The GTK4 widgets of the dark scheme](screenshots/win-classic-dark-widgets-gtk4.png)
+
+![The Qt5 widgets of the dark scheme](screenshots/win-classic-dark-widgets-qt5.png)
+
+![The Qt6 widgets of the dark scheme](screenshots/win-classic-dark-widgets-qt6.png)
 
 ## Presets
 

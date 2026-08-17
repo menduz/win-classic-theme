@@ -1,8 +1,8 @@
 # The screenshots of the theme.
 #
 # `themes` is a set of built themes. The name of an attribute is the name of
-# the theme, the one below `share/themes`. The build takes two screenshots of
-# each theme, on an X server that holds nothing but Xfwm4 and one application.
+# the theme, the one below `share/themes`. The build takes screenshots of each
+# theme on an X server that holds only Xfwm4 and one application.
 #
 # The result is a directory of PNG files. `update-screenshots` copies them to
 # `screenshots/` in the working tree.
@@ -16,6 +16,8 @@
   glib,
   gtk3,
   gtk4,
+  libsForQt5,
+  qt6Packages,
   dbus,
   xvfb,
   xfwm4,
@@ -50,6 +52,50 @@ let
           $(pkg-config --cflags --libs gtk+-3.0)
       '';
 
+  makeQtShowcase =
+    {
+      name,
+      qtbase,
+      stylePlugin,
+      wrapQtAppsHook,
+      pkgConfigName,
+    }:
+    runCommandCC name
+      {
+        nativeBuildInputs = [
+          pkg-config
+          wrapQtAppsHook
+        ];
+        buildInputs = [
+          qtbase
+          stylePlugin
+        ];
+        meta = {
+          description = "Qt widget showcase window for the screenshots of win-classic-theme";
+          mainProgram = name;
+        };
+      }
+      ''
+        mkdir -p "$out/bin"
+        $CXX -std=c++17 -fPIC -O2 -Wall -Wextra -o "$out/bin/${name}" \
+          ${./qt-showcase.cpp} $(pkg-config --cflags --libs ${pkgConfigName})
+        wrapQtApp "$out/bin/${name}"
+      '';
+
+  qt5Showcase = makeQtShowcase {
+    name = "qt5-showcase";
+    inherit (libsForQt5) qtbase wrapQtAppsHook;
+    stylePlugin = libsForQt5.qtstyleplugins;
+    pkgConfigName = "Qt5Widgets";
+  };
+
+  qt6Showcase = makeQtShowcase {
+    name = "qt6-showcase";
+    inherit (qt6Packages) qtbase wrapQtAppsHook;
+    stylePlugin = qt6Packages.qt6gtk2;
+    pkgConfigName = "Qt6Widgets";
+  };
+
   fontsConf = makeFontsConf { fontDirectories = [ liberation_ttf ]; };
 
   # The X server, the window manager and the applications, with an environment
@@ -66,6 +112,8 @@ let
       xdotool
       imagemagick
       showcase
+      qt5Showcase
+      qt6Showcase
       gtk3.dev # gtk3-widget-factory
       gtk4.dev # gtk4-widget-factory
     ];
