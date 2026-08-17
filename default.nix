@@ -250,6 +250,7 @@ stdenv.mkDerivation {
         "dev"
         "flake.lock"
         "flake.nix"
+        "nixos-module.nix"
         "README.md"
         "result"
         "screenshots"

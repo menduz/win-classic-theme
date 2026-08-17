@@ -109,6 +109,8 @@
         }
       );
 
+      nixosModules.default = import ./nixos-module.nix;
+
       # `pkgs.win-classic-theme` in another flake. See the README.
       overlays.default = final: prev: {
         win-classic-theme = final.callPackage ./default.nix { };

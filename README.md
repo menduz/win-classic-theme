@@ -108,7 +108,8 @@ calculates the two 3D edges and the disabled text from `bgcolor`. See
 
 ## NixOS
 
-The overlay puts `win-classic-theme` in `pkgs`:
+The overlay puts `win-classic-theme` in `pkgs`. The NixOS module writes the
+global GTK4 font settings when `programs.win-classic-theme.enabled` is true:
 
 ```nix
 {
@@ -123,11 +124,18 @@ The overlay puts `win-classic-theme` in `pkgs`:
       nixosConfigurations.desktop = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
+          win-classic-theme.nixosModules.default
           { nixpkgs.overlays = [ win-classic-theme.overlays.default ]; }
           (
             { pkgs, ... }:
             {
               environment.systemPackages = [ pkgs.win-classic-theme ];
+              programs.win-classic-theme = {
+                enabled = true;
+                gtk4ExtraSettings = ''
+                  gtk-font-name=Liberation Sans 9
+                '';
+              };
             }
           )
         ];

@@ -116,7 +116,13 @@ gtk-icon-theme-name=Adwaita
 gtk-font-name=Liberation Sans 9
 gtk-enable-animations=false
 gtk-cursor-blink=false
+gtk-font-rendering=manual
 gtk-hint-font-metrics=1
+gtk-xft-antialias=1
+gtk-xft-hinting=1
+gtk-xft-hintstyle=hintslight
+gtk-xft-rgba=none
+gtk-xft-dpi=98304
 INI
 
 cat >"$XDG_CONFIG_HOME/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml" <<XML
@@ -179,7 +185,7 @@ start_x() {
   # The sandbox has an empty /tmp, and the X server does not make this one.
   mkdir -p /tmp/.X11-unix 2>/dev/null || true
   rm -f "$work/display"
-  Xvfb -displayfd 7 -screen 0 "${size}x24" -nolisten tcp 7>"$work/display" \
+  Xvfb -displayfd 7 -screen 0 "${size}x24" -dpi 96 -nolisten tcp 7>"$work/display" \
     2>"$work/xvfb.log" &
   xvfb_pid=$!
   for _ in $(seq 1 100); do
