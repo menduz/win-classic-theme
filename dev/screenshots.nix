@@ -56,6 +56,15 @@ let
           $(pkg-config --cflags --libs gtk+-3.0)
       '';
 
+  disableProgressPulse =
+    runCommandCC "win-classic-disable-progress-pulse" { }
+      ''
+        mkdir -p "$out/lib"
+        $CC -shared -fPIC -O2 -Wall -Wextra \
+          -o "$out/lib/disable-progress-pulse.so" \
+          ${./disable-progress-pulse.c}
+      '';
+
   makeQtShowcase =
     {
       name,
@@ -138,6 +147,7 @@ let
       export GDK_PIXBUF_MODULE_FILE=${librsvg}/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
       export FONTCONFIG_FILE=${fontsConf}
       export DBUS_SESSION_CONF=${dbus}/share/dbus-1/session.conf
+      export GTK_FACTORY_PULSE_BLOCKER=${disableProgressPulse}/lib/disable-progress-pulse.so
       exec bash ${./screenshot.sh} "$@"
     '';
   };

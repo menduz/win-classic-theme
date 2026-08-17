@@ -111,9 +111,8 @@ For each scheme, two more screenshots show `dev/qt-showcase.cpp`, built with
 Qt5 and Qt6. The Qt5 program uses `qtstyleplugins`, and the Qt6 program uses
 `qt6gtk2`. Both plugins read the GTK2 style sheet of the built theme.
 
-The showcase screenshot is the same on every build. The screenshots of the two
-widget factories are not the same. Those programs move a progress bar on a
-timer. Thus some pixels of them change from one build to the next build.
+The screenshot command disables the timed progress indicators in the two
+widget factories. Thus repeated builds produce the same pixels.
 
 The files of this section are not part of the theme. `default.nix` keeps them
 out of the source. Thus a new screenshot does not build the theme again.

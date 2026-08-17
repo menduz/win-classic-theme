@@ -260,14 +260,18 @@ shot_showcase() {
 # A window that holds common widgets. The window draws its own frame, so the
 # picture holds the window alone. Each window has the same size for comparison.
 #
-#     shot_factory <program> <output file>
+#     shot_factory <program> <output file> [preload library]
 shot_factory() {
-  local program=$1 file=$2 id
+  local program=$1 file=$2 preload=${3:-} id
 
   start_x 1400x820
   start_wm
 
-  "$program" >"$work/$program.log" 2>&1 &
+  if [ -n "$preload" ]; then
+    LD_PRELOAD="$preload" "$program" >"$work/$program.log" 2>&1 &
+  else
+    "$program" >"$work/$program.log" 2>&1 &
+  fi
   app_pid=$!
   # The window manager gives the focus to the window it maps, and the window
   # of the application is the only one here.
@@ -312,8 +316,10 @@ files=(
 )
 
 shot_showcase
-shot_factory gtk3-widget-factory "$out_dir/$name-widgets.png"
-shot_factory gtk4-widget-factory "$out_dir/$name-widgets-gtk4.png"
+shot_factory gtk3-widget-factory "$out_dir/$name-widgets.png" \
+  "${GTK_FACTORY_PULSE_BLOCKER:-}"
+shot_factory gtk4-widget-factory "$out_dir/$name-widgets-gtk4.png" \
+  "${GTK_FACTORY_PULSE_BLOCKER:-}"
 QT_QPA_PLATFORMTHEME=gtk2 QT_STYLE_OVERRIDE=gtk2 \
   shot_factory qt5-showcase "$out_dir/$name-widgets-qt5.png"
 QT_QPA_PLATFORMTHEME=qt6gtk2 QT_STYLE_OVERRIDE=qt6gtk2 \
