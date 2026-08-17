@@ -24,3 +24,7 @@ window.background filechooser gridview * {
   background-color: @bg_color;
   border-radius: 0;
 }
+
+video image.osd {
+  color: @theme_selected_fg_color;
+}
