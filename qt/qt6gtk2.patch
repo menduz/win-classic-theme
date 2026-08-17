@@ -1,0 +1,21 @@
+diff --git a/src/qt6gtk2-style/qgtkstyle.cpp b/src/qt6gtk2-style/qgtkstyle.cpp
+index 7da5645..973de00 100644
+--- a/src/qt6gtk2-style/qgtkstyle.cpp
++++ b/src/qt6gtk2-style/qgtkstyle.cpp
+@@ -4156,6 +4156,9 @@ QRect QGtkStyle::subElementRect(SubElement element, const QStyleOption *option, c
+     case SE_PushButtonFocusRect:
+         r.adjust(0, 1, 0, -1);
+         break;
++    case SE_RadioButtonContents:
++        r.translate(option->direction == Qt::LeftToRight ? 1 : -1, 0);
++        break;
+     case SE_DockWidgetTitleBarText: {
+         const QStyleOptionDockWidget *v2
+             = qstyleoption_cast<const QStyleOptionDockWidget*>(option);
+diff --git a/src/qt6gtk2-style/qgtkstyle_p.cpp b/src/qt6gtk2-style/qgtkstyle_p.cpp
+index 6310978..03f6865 100644
+--- a/src/qt6gtk2-style/qgtkstyle_p.cpp
++++ b/src/qt6gtk2-style/qgtkstyle_p.cpp
+@@ -537,1 +537,2 @@ QFont QGtkStylePrivate::getThemeFont()
++        font.setHintingPreference(QFont::PreferFullHinting);
+         QString family = QString::fromLatin1(pango_font_description_get_family(gtk_font));

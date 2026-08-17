@@ -140,8 +140,18 @@ cat >"$XDG_CONFIG_HOME/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml" <<XML
 </channel>
 XML
 
+cat >"$work/gtkrc-2.0" <<RC
+include "$theme_dir/gtk-2.0/gtkrc"
+style "screenshot-font"
+{
+  font_name = "Liberation Sans 9"
+}
+widget_class "*" style "screenshot-font"
+gtk-font-name = "Liberation Sans 9"
+RC
+
 export GTK_THEME=$name
-export GTK2_RC_FILES=$theme_dir/gtk-2.0/gtkrc
+export GTK2_RC_FILES=$work/gtkrc-2.0
 # The theme has no icon of its own, and no application here needs a11y or a
 # portal. Turn both off to keep the log clean and the start fast.
 export GTK_A11Y=none

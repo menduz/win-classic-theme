@@ -109,7 +109,11 @@
         }
       );
 
+      # The system part and the user part of a session. A configuration that
+      # uses Home Manager imports both, and declares the same
+      # `programs.win-classic-theme` block in each one.
       nixosModules.default = import ./nixos-module.nix;
+      homeManagerModules.default = import ./home-manager-module.nix;
 
       # `pkgs.win-classic-theme` in another flake. See the README.
       overlays.default = final: prev: {

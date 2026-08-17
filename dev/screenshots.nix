@@ -35,6 +35,10 @@
   demoTheme ? "win-classic-standard",
 }:
 let
+  qtStyles = import ../qt {
+    inherit libsForQt5 qt6Packages;
+  };
+
   # The window with one widget of each kind. The screenshot script starts it.
   showcase =
     runCommandCC "win-classic-showcase"
@@ -85,14 +89,14 @@ let
   qt5Showcase = makeQtShowcase {
     name = "qt5-showcase";
     inherit (libsForQt5) qtbase wrapQtAppsHook;
-    stylePlugin = libsForQt5.qtstyleplugins;
+    stylePlugin = qtStyles.qt5;
     pkgConfigName = "Qt5Widgets";
   };
 
   qt6Showcase = makeQtShowcase {
     name = "qt6-showcase";
     inherit (qt6Packages) qtbase wrapQtAppsHook;
-    stylePlugin = qt6Packages.qt6gtk2;
+    stylePlugin = qtStyles.qt6;
     pkgConfigName = "Qt6Widgets";
   };
 
