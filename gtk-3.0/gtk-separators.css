@@ -67,6 +67,15 @@ popover separator {
   background-color: @dark_shadow;
 }
 
+menu separator + separator,
+popover.menu separator + separator {
+  min-height: 0;
+  margin: 0;
+  border: none;
+  box-shadow: none;
+  background: none;
+}
+
 combobox separator {
   background: transparent;
   border: none;
