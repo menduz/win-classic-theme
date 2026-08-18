@@ -229,18 +229,22 @@ in
     font = {
       name = lib.mkOption {
         type = lib.types.str;
-        default = "Liberation Sans";
+        default = "MS Sans Serif";
         description = "The interface font.";
       };
       size = lib.mkOption {
         type = lib.types.int;
-        default = 9;
-        description = "The size of the interface font, in points.";
+        default = 8;
+        description = ''
+          The size of the interface font, in points. Windows 9x draws its
+          interface with MS Sans Serif at 8 points, and the font of `fonts/`
+          gives a whole pixel to each line of a glyph at that size.
+        '';
       };
       package = lib.mkOption {
         type = lib.types.nullOr lib.types.package;
-        default = pkgs.liberation_ttf;
-        defaultText = lib.literalExpression "pkgs.liberation_ttf";
+        default = pkgs.callPackage ./fonts { };
+        defaultText = lib.literalExpression "the MS Sans Serif of `fonts/`";
         description = "The package that holds the interface font.";
       };
     };

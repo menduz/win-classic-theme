@@ -143,7 +143,7 @@ and `variant` names the one that the session starts with.
           dark = { preset = "dark"; dark = true; };
           standard = { preset = "windows-standard"; };
         };
-        font = { name = "Liberation Sans"; size = 9; };
+        font = { name = "MS Sans Serif"; size = 8; };
       };
     in
     {
@@ -262,7 +262,7 @@ in the store. A new window takes the new scheme; an open one needs a restart.
 | `titlebarButtons`           | all                | the buttons of a title bar                          |
 | `decorationLayout`          | that of the theme  | `gtk-decoration-layout`, the buttons that GTK draws |
 | `windowManagerButtonLayout` | that of the theme  | the buttons that the window manager draws           |
-| `font`                      | Liberation Sans 9  | the interface font                                  |
+| `font`                      | MS Sans Serif 8    | the interface font                                  |
 | `iconTheme`                 | Chicago95          | the icon theme                                      |
 | `cursorTheme`               | Adwaita 16         | the cursor theme                                    |
 | `fontRendering`             | 96 dpi, hintslight | antialias, hinting, subpixel order and dpi          |
@@ -286,3 +286,9 @@ the slider alone. Give the file to such a program, for example with the
 
 GPL 3. See `LICENSE`. The images and the style sheets come from Redmond97 SE by
 Sliver X.
+
+`fonts/` holds the interface font, the FontStruction "MS Sans Serif" and
+"MS Sans Serif Bold" by "lou", under a
+[Creative Commons Attribution Share Alike 3.0](http://creativecommons.org/licenses/by-sa/3.0/)
+license. Each directory keeps the license and the readme of the author beside
+the font file, as that license asks.

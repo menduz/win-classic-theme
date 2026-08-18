@@ -103,7 +103,7 @@ cat >"$XDG_CONFIG_HOME/gtk-3.0/settings.ini" <<INI
 [Settings]
 gtk-theme-name=$name
 gtk-icon-theme-name=Adwaita
-gtk-font-name=Liberation Sans 9
+gtk-font-name=MS Sans Serif 8
 gtk-enable-animations=false
 gtk-cursor-blink=false
 gtk-xft-antialias=1
@@ -120,7 +120,7 @@ CSS
 cat >"$XDG_CONFIG_HOME/gtk-4.0/settings.ini" <<INI
 [Settings]
 gtk-icon-theme-name=Adwaita
-gtk-font-name=Liberation Sans 9
+gtk-font-name=MS Sans Serif 8
 gtk-enable-animations=false
 gtk-cursor-blink=false
 gtk-font-rendering=manual
@@ -137,7 +137,7 @@ cat >"$XDG_CONFIG_HOME/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml" <<XML
 <channel name="xfwm4" version="1.0">
   <property name="general" type="empty">
     <property name="theme" type="string" value="$name"/>
-    <property name="title_font" type="string" value="Liberation Sans Bold 9"/>
+    <property name="title_font" type="string" value="MS Sans Serif Bold 8"/>
     <property name="use_compositing" type="bool" value="false"/>
     <property name="workspace_count" type="int" value="1"/>
     <property name="click_to_focus" type="bool" value="true"/>
@@ -151,10 +151,10 @@ cat >"$work/gtkrc-2.0" <<RC
 include "$theme_dir/gtk-2.0/gtkrc"
 style "screenshot-font"
 {
-  font_name = "Liberation Sans 9"
+  font_name = "MS Sans Serif 8"
 }
 widget_class "*" style "screenshot-font"
-gtk-font-name = "Liberation Sans 9"
+gtk-font-name = "MS Sans Serif 8"
 # The Qt style of GTK2 takes the icons of the program from this key. Without
 # it a Qt window shows an empty button in place of each icon.
 gtk-icon-theme-name = "Adwaita"

@@ -8,6 +8,7 @@
 # `screenshots/` in the working tree.
 {
   lib,
+  callPackage,
   runCommand,
   runCommandCC,
   writeShellApplication,
@@ -108,7 +109,16 @@ let
     pkgConfigName = "Qt6Widgets";
   };
 
-  fontsConf = makeFontsConf { fontDirectories = [ liberation_ttf ]; };
+  # The interface font of the theme. Liberation stays beside it, because the
+  # pixel font holds no glyph for the arrows and the marks of a widget factory.
+  msSansSerif = callPackage ../fonts { };
+
+  fontsConf = makeFontsConf {
+    fontDirectories = [
+      msSansSerif
+      liberation_ttf
+    ];
+  };
 
   # The X server, the window manager and the applications, with an environment
   # that holds no setting of the user.

@@ -250,6 +250,7 @@ stdenv.mkDerivation {
         "dev"
         "flake.lock"
         "flake.nix"
+        "fonts"
         "home-manager-module.nix"
         "nixos-module.nix"
         "options.nix"
