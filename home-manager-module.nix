@@ -26,6 +26,10 @@ let
   themeAttrs = {
     inherit (cfg.theme) name package;
   };
+
+  iconThemeAttrs = {
+    inherit (cfg.iconTheme) name package;
+  };
 in
 {
   imports = [ ./options.nix ];
@@ -60,16 +64,20 @@ in
       font = {
         inherit (cfg.font) name size package;
       };
-      iconTheme = {
-        inherit (cfg.iconTheme) name package;
-      };
+      iconTheme = iconThemeAttrs;
       cursorTheme = {
         inherit (cfg.cursorTheme) name package size;
       };
       colorScheme = if cfg.theme.dark then "dark" else "light";
 
       # The Qt style of GTK2 reads ~/.gtkrc-2.0, so a Qt program needs this file.
-      gtk2.theme = themeAttrs;
+      # It takes the icon of a button, of a tab and of a menu item from the icon
+      # theme in the same file. Without that key a Qt window shows an empty
+      # place at each icon.
+      gtk2 = {
+        theme = themeAttrs;
+        iconTheme = iconThemeAttrs;
+      };
 
       gtk3 = {
         theme = themeAttrs;

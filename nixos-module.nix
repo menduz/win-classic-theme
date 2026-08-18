@@ -16,6 +16,17 @@ let
     settings:
     "[Settings]\n"
     + lib.concatStrings (lib.mapAttrsToList (key: value: "${key}=${toValue value}\n") settings);
+
+  # GTK2 reads no settings.ini. It reads this file, and the Qt style of GTK2
+  # reads it too. A Qt program takes the icon of a button, of a tab and of a
+  # menu item from the icon theme in it.
+  gtk2Rc = ''
+    gtk-theme-name = "${cfg.theme.name}"
+    gtk-icon-theme-name = "${cfg.iconTheme.name}"
+    gtk-cursor-theme-name = "${cfg.cursorTheme.name}"
+    gtk-cursor-theme-size = ${toString cfg.cursorTheme.size}
+    gtk-font-name = "${cfg.font.name} ${toString cfg.font.size}"
+  '';
 in
 {
   imports = [ ./options.nix ];
@@ -39,6 +50,10 @@ in
     environment.etc = {
       "xdg/gtk-3.0/settings.ini".text = toIni cfg.settings.gtk3;
       "xdg/gtk-4.0/settings.ini".text = toIni cfg.settings.gtk4;
+      # GTK2 reads /etc/gtk-2.0/gtkrc before the file of the user. Home Manager
+      # writes that second file, and a session without Home Manager gets the
+      # theme and the icons from this one.
+      "gtk-2.0/gtkrc".text = gtk2Rc;
     };
 
     environment.systemPackages = lib.mkIf cfg.installPackages (
