@@ -28,6 +28,7 @@
   xdotool,
   imagemagick,
   adwaita-icon-theme,
+  chicago95,
   librsvg,
   liberation_ttf,
   opensnitch-ui,
@@ -146,6 +147,10 @@ let
       export XDG_DATA_DIRS=${
         lib.concatStringsSep ":" [
           "${xfconf}/share"
+          # The icon theme of the modules. Adwaita stays behind it, as in the
+          # profile of a user: the modules take the cursor from that package,
+          # and a toolkit reads it for an icon that Chicago95 does not hold.
+          "${chicago95}/share"
           "${adwaita-icon-theme}/share"
           (glib.getSchemaDataDirPath gtk3)
           (glib.getSchemaDataDirPath gtk4)

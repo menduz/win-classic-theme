@@ -102,7 +102,7 @@ ln -sfn "$theme_dir" "$HOME/.themes/$name"
 cat >"$XDG_CONFIG_HOME/gtk-3.0/settings.ini" <<INI
 [Settings]
 gtk-theme-name=$name
-gtk-icon-theme-name=Adwaita
+gtk-icon-theme-name=Chicago95
 gtk-font-name=MS Sans Serif 8
 gtk-enable-animations=false
 gtk-cursor-blink=false
@@ -119,7 +119,7 @@ CSS
 
 cat >"$XDG_CONFIG_HOME/gtk-4.0/settings.ini" <<INI
 [Settings]
-gtk-icon-theme-name=Adwaita
+gtk-icon-theme-name=Chicago95
 gtk-font-name=MS Sans Serif 8
 gtk-enable-animations=false
 gtk-cursor-blink=false
@@ -155,7 +155,7 @@ include "$theme_dir/gtk-2.0/gtkrc"
 gtk-font-name = "MS Sans Serif 8"
 # The Qt style of GTK2 takes the icons of the program from this key. Without
 # it a Qt window shows an empty button in place of each icon.
-gtk-icon-theme-name = "Adwaita"
+gtk-icon-theme-name = "Chicago95"
 RC
 
 export GTK_THEME=$name
