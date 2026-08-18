@@ -111,8 +111,22 @@ For each scheme, two more screenshots show `dev/qt-showcase.cpp`, built with
 Qt5 and Qt6. The Qt5 program uses `qtstyleplugins`, and the Qt6 program uses
 `qt6gtk2`. Both plugins read the GTK2 style sheet of the built theme.
 
+The last two screenshots of a scheme show `opensnitch-ui`, a program of PyQt6.
+They are a reference for the widgets that no showcase here holds: a tool box, a
+tab bar with icons and a table of events. `<name>-opensnitch.png` holds the
+main window and `<name>-opensnitch-prefs.png` holds the Preferences dialog. No
+daemon runs in the sandbox, thus the window shows no event and no node.
+
+The program keeps its window in the system tray, and it shows that window when
+a second program of the same name asks for it through its local socket. The
+script starts a second one for that reason. It then opens the Preferences
+dialog with a click on the second button of the tool bar. `prefs_button_x` and
+`prefs_button_y` in `dev/screenshot.sh` give the place of that button. The
+script waits for the dialog, so the build stops if the button moves.
+
 The screenshot command disables the timed progress indicators in the two
-widget factories. Thus repeated builds produce the same pixels.
+widget factories. Thus repeated builds produce the same pixels. `nix build
+--rebuild .#screenshots` compares a second build with the first one.
 
 The files of this section are not part of the theme. `default.nix` keeps them
 out of the source. Thus a new screenshot does not build the theme again.

@@ -29,6 +29,7 @@
   adwaita-icon-theme,
   librsvg,
   liberation_ttf,
+  opensnitch-ui,
   themes,
 
   # The scheme of the screenshots of the demos. AGENTS.md asks for this one.
@@ -56,14 +57,12 @@ let
           $(pkg-config --cflags --libs gtk+-3.0)
       '';
 
-  disableProgressPulse =
-    runCommandCC "win-classic-disable-progress-pulse" { }
-      ''
-        mkdir -p "$out/lib"
-        $CC -shared -fPIC -O2 -Wall -Wextra \
-          -o "$out/lib/disable-progress-pulse.so" \
-          ${./disable-progress-pulse.c}
-      '';
+  disableProgressPulse = runCommandCC "win-classic-disable-progress-pulse" { } ''
+    mkdir -p "$out/lib"
+    $CC -shared -fPIC -O2 -Wall -Wextra \
+      -o "$out/lib/disable-progress-pulse.so" \
+      ${./disable-progress-pulse.c}
+  '';
 
   makeQtShowcase =
     {
@@ -127,6 +126,7 @@ let
       showcase
       qt5Showcase
       qt6Showcase
+      opensnitch-ui
       gtk3.dev # gtk3-widget-factory
       gtk4.dev # gtk4-widget-factory
     ];
@@ -147,6 +147,10 @@ let
       export GDK_PIXBUF_MODULE_FILE=${librsvg}/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
       export FONTCONFIG_FILE=${fontsConf}
       export DBUS_SESSION_CONF=${dbus}/share/dbus-1/session.conf
+      # opensnitch-ui comes from the package set, and its wrapper knows the
+      # plugins of Qt6 but not the style of this theme. Qt reads the style from
+      # this variable, and the wrapper keeps the value.
+      export QT_PLUGIN_PATH=${qtStyles.qt6}/lib/qt-6/plugins
       export GTK_FACTORY_PULSE_BLOCKER=${disableProgressPulse}/lib/disable-progress-pulse.so
       exec bash ${./screenshot.sh} "$@"
     '';

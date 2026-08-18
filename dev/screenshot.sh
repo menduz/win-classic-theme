@@ -10,13 +10,15 @@
 # The script needs Xvfb, Xfwm4, dbus, ImageMagick and the showcase programs in
 # PATH. `dev/screenshots.nix` gives them.
 #
-# It writes five files in the output directory:
+# It writes seven files in the output directory:
 #
-#     <name>.png               a desktop with two windows and an open menu
-#     <name>-widgets.png       the window of gtk3-widget-factory
-#     <name>-widgets-gtk4.png  the window of gtk4-widget-factory
-#     <name>-widgets-qt5.png   the Qt5 widget showcase
-#     <name>-widgets-qt6.png   the Qt6 widget showcase
+#     <name>.png                  a desktop with two windows and an open menu
+#     <name>-widgets.png          the window of gtk3-widget-factory
+#     <name>-widgets-gtk4.png     the window of gtk4-widget-factory
+#     <name>-widgets-qt5.png      the Qt5 widget showcase
+#     <name>-widgets-qt6.png      the Qt6 widget showcase
+#     <name>-opensnitch.png       the window of opensnitch-ui
+#     <name>-opensnitch-prefs.png the Preferences dialog of opensnitch-ui
 #
 # With a fourth argument it writes the window of one demo of each toolkit in
 # that directory:
@@ -43,6 +45,11 @@ demo=builder
 # size, thus the two pictures compare.
 factory_width=1280
 factory_height=720
+
+# The middle of the Preferences button of opensnitch-ui, from the corner of the
+# window below the title bar.
+prefs_button_x=91
+prefs_button_y=20
 
 work=$(mktemp -d)
 xvfb_pid=""
@@ -148,6 +155,9 @@ style "screenshot-font"
 }
 widget_class "*" style "screenshot-font"
 gtk-font-name = "Liberation Sans 9"
+# The Qt style of GTK2 takes the icons of the program from this key. Without
+# it a Qt window shows an empty button in place of each icon.
+gtk-icon-theme-name = "Adwaita"
 RC
 
 export GTK_THEME=$name
@@ -286,6 +296,62 @@ shot_factory() {
   stop_x
 }
 
+# The window of opensnitch-ui and its Preferences dialog. The program uses Qt6
+# and PyQt, thus it shows the GTK2 style of the theme through qt6gtk2. It holds
+# widgets that no showcase here holds: a tool box, a tab bar with icons and a
+# table of events.
+#
+#     shot_opensnitch <output file> <preferences output file>
+shot_opensnitch() {
+  local file=$1 prefs_file=$2 id prefs_id
+  # The program puts its local socket below the runtime directory of the
+  # session. This script has no session, so it gives it one directory of its
+  # own. The settings go below XDG_CONFIG_HOME.
+  local run_dir=$work/run
+
+  start_x 1400x820
+  start_wm
+
+  # The run of an earlier scheme leaves the settings and the socket, and a
+  # picture must not depend on the run before it.
+  rm -rf "$XDG_CONFIG_HOME/opensnitch" "$run_dir"
+  mkdir -p "$run_dir"
+  chmod 700 "$run_dir"
+
+  # The daemon connects to this socket. No daemon runs here, so the program
+  # shows the window of a user who has nothing connected.
+  XDG_RUNTIME_DIR=$run_dir opensnitch-ui --socket "unix://$work/osui.sock" \
+    >"$work/opensnitch.log" 2>&1 &
+  app_pid=$!
+  wait_for test -S "$run_dir/opensnitch/io.github.evilsocket.opensnitch"
+
+  # The window stays hidden while there is a system tray, and Qt finds one on
+  # this X server. A second program connects to the local socket of the first
+  # one, which then shows its window and stays.
+  XDG_RUNTIME_DIR=$run_dir opensnitch-ui --socket "unix://$work/osui-second.sock" \
+    >"$work/opensnitch-second.log" 2>&1 || true
+  wait_for xdotool search --onlyvisible --name "OpenSnitch Network Statistics"
+  sleep 3 # the tabs and the table take their size
+
+  id=$(xdotool search --onlyvisible --name "OpenSnitch Network Statistics" | head -1)
+  xdotool windowmove "$id" 0 0
+  xdotool windowsize "$id" "$factory_width" "$factory_height"
+  sleep 2
+  magick import -window "$id" -screen "$file"
+
+  # The Preferences dialog opens from the second button of the tool bar. The
+  # font and the style are the same on each run, thus the button is at the same
+  # place. The wait below stops the build if it moves.
+  eval "$(xdotool getwindowgeometry --shell "$id")"
+  xdotool mousemove $((X + prefs_button_x)) $((Y + prefs_button_y)) click 1
+  wait_for xdotool search --onlyvisible --name '^Preferences$'
+  sleep 2
+
+  prefs_id=$(xdotool search --onlyvisible --name '^Preferences$' | head -1)
+  magick import -window "$prefs_id" -screen "$prefs_file"
+  stop_x
+}
+
 # The window of one demo. Both programs take `--run`.
 #
 #     shot_demo <program> <output file>
@@ -313,6 +379,8 @@ files=(
   "$out_dir/$name-widgets-gtk4.png"
   "$out_dir/$name-widgets-qt5.png"
   "$out_dir/$name-widgets-qt6.png"
+  "$out_dir/$name-opensnitch.png"
+  "$out_dir/$name-opensnitch-prefs.png"
 )
 
 shot_showcase
@@ -324,6 +392,11 @@ QT_QPA_PLATFORMTHEME=gtk2 QT_STYLE_OVERRIDE=gtk2 \
   shot_factory qt5-showcase "$out_dir/$name-widgets-qt5.png"
 QT_QPA_PLATFORMTHEME=qt6gtk2 QT_STYLE_OVERRIDE=qt6gtk2 \
   shot_factory qt6-showcase "$out_dir/$name-widgets-qt6.png"
+# The plugin of Qt6 answers to `gtk2` as well as to `qt6gtk2`. The name here is
+# the one that the modules put in the session of the user.
+QT_QPA_PLATFORMTHEME=gtk2 QT_STYLE_OVERRIDE=gtk2 \
+  shot_opensnitch "$out_dir/$name-opensnitch.png" \
+  "$out_dir/$name-opensnitch-prefs.png"
 
 if [ -n "$demo_dir" ]; then
   mkdir -p "$demo_dir"
