@@ -147,13 +147,11 @@ cat >"$XDG_CONFIG_HOME/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml" <<XML
 </channel>
 XML
 
+# The same keys that Home Manager writes for a user, in the same order: the
+# theme, then the settings. A style for `widget_class "*"` here would hide a
+# font that the theme sets, and then no screenshot would show that fault.
 cat >"$work/gtkrc-2.0" <<RC
 include "$theme_dir/gtk-2.0/gtkrc"
-style "screenshot-font"
-{
-  font_name = "MS Sans Serif 8"
-}
-widget_class "*" style "screenshot-font"
 gtk-font-name = "MS Sans Serif 8"
 # The Qt style of GTK2 takes the icons of the program from this key. Without
 # it a Qt window shows an empty button in place of each icon.
