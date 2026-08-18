@@ -58,6 +58,11 @@ in
   config = lib.mkIf cfg.enabled {
     home.packages = lib.mkIf cfg.installPackages (lib.attrValues cfg.packages);
 
+    # Home Manager puts the font of `gtk.font` in the profile of the user, and
+    # fontconfig reads that profile only with this option. Without it a program
+    # asks for "MS Sans Serif", finds nothing and draws with another font.
+    fonts.fontconfig.enable = lib.mkIf (cfg.font.package != null) (lib.mkDefault true);
+
     gtk = {
       enable = true;
 
