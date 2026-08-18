@@ -274,6 +274,22 @@ in the store. A new window takes the new scheme; an open one needs a restart.
 Xfwm4 reads the theme by name. Set the same name in the property
 `/general/theme` of the channel `xfwm4`.
 
+### The interface font
+
+`font` is MS Sans Serif 8, the font of `fonts/`. The Home Manager module puts
+it in the profile of the user and turns `fonts.fontconfig.enable` on, because
+fontconfig reads the profile only with that option.
+
+The font goes to the programs that read a GTK setting or the GTK2 style of Qt.
+A program that asks for the family `sans-serif` gets the font of the system.
+This line gives it the font of the theme too:
+
+```nix
+fonts.fontconfig.defaultFonts.sansSerif = [ "MS Sans Serif" ];
+```
+
+The font draws a pixel grid, so a web page and a document also get that grid.
+
 ### A program that draws its own scroll bar
 
 GTK4 draws a scroll bar on top of the content. The theme paints the trough with
