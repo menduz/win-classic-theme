@@ -58,16 +58,19 @@ in
   config = lib.mkIf cfg.enabled {
     home.packages = lib.mkIf cfg.installPackages (lib.attrValues cfg.packages);
 
-    # Home Manager puts the font of `gtk.font` in the profile of the user, and
-    # fontconfig reads that profile only with this option. Without it a program
-    # asks for "MS Sans Serif", finds nothing and draws with another font.
-    fonts.fontconfig.enable = lib.mkIf (cfg.font.package != null) (lib.mkDefault true);
+    # fontconfig reads the profile of the user only with this option. A
+    # configuration that puts the interface font in `home.packages`, and not in
+    # the `fonts.packages` of NixOS, needs it.
+    fonts.fontconfig.enable = lib.mkDefault true;
 
     gtk = {
       enable = true;
 
+      # The family comes from `fonts.fontconfig.defaultFonts.sansSerif` of the
+      # system. The theme installs no font.
       font = {
-        inherit (cfg.font) name size package;
+        name = cfg.fontName;
+        size = cfg.baseFontSize;
       };
       iconTheme = iconThemeAttrs;
       cursorTheme = {

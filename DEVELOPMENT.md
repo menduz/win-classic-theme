@@ -78,9 +78,16 @@ on the next build of a different scheme. Add a token in its place.
 
 `fonts/` holds the two files of the FontStruction "MS Sans Serif" by "lou",
 each one with the license and the readme of the author. `fonts/default.nix`
-makes the package, and `font.package` in the modules installs it. The theme
-itself holds no font: the package of a scheme and the package of the font are
-two different packages.
+makes the package, and the flake gives it as `packages.<system>.ms-sans-serif`.
+The theme itself holds no font: the package of a scheme and the package of the
+font are two different packages.
+
+The modules install no font either. They read the first family of
+`fonts.fontconfig.defaultFonts.sansSerif` and write it in the GTK settings, so
+a configuration that wants this font puts the package in `fonts.packages` and
+the name "MS Sans Serif" in that list. The Home Manager module reads the list
+of the user first, then the list of the system through the special argument
+`osConfig`, and `sans-serif` at the end.
 
 The bold file gives itself the family "MS Sans Serif Bold" and the style
 "Regular". A toolkit that asks for bold text then draws a fake bold of the
@@ -91,8 +98,8 @@ Thus the two files make one family with two styles, and a description such as
 author made them.
 
 The font puts each line of a glyph on a whole pixel at 8 points and 96 dpi,
-which is the size of the interface of Windows 9x. `font.size` changes it. The
-screenshots below use that size.
+which is the size of the interface of Windows 9x. `baseFontSize` changes it.
+The screenshots below use that size.
 
 ## How the build makes the screenshots
 

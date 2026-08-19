@@ -57,6 +57,11 @@
         // {
           default = themes.dark;
           inherit (shots) screenshots showcase;
+          # The interface font of Windows 9x. The modules install no font: they
+          # read the family of `fonts.fontconfig.defaultFonts.sansSerif`, so a
+          # configuration puts this package in `fonts.packages` and the name
+          # "MS Sans Serif" in that list.
+          ms-sans-serif = pkgs.callPackage ./fonts { };
         }
       );
 
@@ -115,9 +120,11 @@
       nixosModules.default = import ./nixos-module.nix;
       homeManagerModules.default = import ./home-manager-module.nix;
 
-      # `pkgs.win-classic-theme` in another flake. See the README.
+      # `pkgs.win-classic-theme` and `pkgs.ms-sans-serif` in another flake. See
+      # the README.
       overlays.default = final: prev: {
         win-classic-theme = final.callPackage ./default.nix { };
+        ms-sans-serif = final.callPackage ./fonts { };
       };
     };
 }

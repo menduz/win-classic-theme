@@ -114,7 +114,7 @@ configuration declares the same block in each one.
 
 | Module                       | What it writes                                                                           |
 | ---------------------------- | ---------------------------------------------------------------------------------------- |
-| `nixosModules.default`       | `/etc/xdg/gtk-{3,4}.0/settings.ini`, the schemes, the fonts, `GTK_THEME`                  |
+| `nixosModules.default`       | `/etc/xdg/gtk-{3,4}.0/settings.ini`, the schemes, `GTK_THEME`                             |
 | `homeManagerModules.default` | the GTK files of the user, the style sheet, the cursor, the Qt style, the GSettings keys |
 
 The NixOS module alone gives a themed session. The Home Manager module adds
@@ -143,7 +143,7 @@ and `variant` names the one that the session starts with.
           dark = { preset = "dark"; dark = true; };
           standard = { preset = "windows-standard"; };
         };
-        font = { name = "MS Sans Serif"; size = 8; };
+        baseFontSize = 8;
       };
     in
     {
@@ -154,6 +154,12 @@ and `variant` names the one that the session starts with.
           home-manager.nixosModules.home-manager
           {
             programs.win-classic-theme = theme;
+
+            # The theme installs no font. It draws with the family below.
+            fonts.packages = [
+              win-classic-theme.packages.x86_64-linux.ms-sans-serif
+            ];
+            fonts.fontconfig.defaultFonts.sansSerif = [ "MS Sans Serif" ];
 
             home-manager.users.alice = {
               imports = [ win-classic-theme.homeManagerModules.default ];
@@ -167,8 +173,8 @@ and `variant` names the one that the session starts with.
 }
 ```
 
-The overlay also puts `win-classic-theme` in `pkgs` for a configuration that
-wants the package alone:
+The overlay also puts `win-classic-theme` and `ms-sans-serif` in `pkgs` for a
+configuration that wants a package alone:
 
 ```nix
 { nixpkgs.overlays = [ win-classic-theme.overlays.default ]; }
@@ -262,7 +268,7 @@ in the store. A new window takes the new scheme; an open one needs a restart.
 | `titlebarButtons`           | all                | the buttons of a title bar                          |
 | `decorationLayout`          | that of the theme  | `gtk-decoration-layout`, the buttons that GTK draws |
 | `windowManagerButtonLayout` | that of the theme  | the buttons that the window manager draws           |
-| `font`                      | MS Sans Serif 8    | the interface font                                  |
+| `baseFontSize`              | `8`                | the size of the interface font, in points           |
 | `iconTheme`                 | Chicago95          | the icon theme                                      |
 | `cursorTheme`               | Adwaita 16         | the cursor theme                                    |
 | `fontRendering`             | 96 dpi, hintslight | antialias, hinting, subpixel order and dpi          |
@@ -276,19 +282,33 @@ Xfwm4 reads the theme by name. Set the same name in the property
 
 ### The interface font
 
-`font` is MS Sans Serif 8, the font of `fonts/`. The Home Manager module puts
-it in the profile of the user and turns `fonts.fontconfig.enable` on, because
-fontconfig reads the profile only with that option.
+The theme names no font and installs none. It takes the first family of
+`fonts.fontconfig.defaultFonts.sansSerif` and writes it in the GTK settings, in
+`~/.gtkrc-2.0` for the GTK2 style of Qt, and in the title bar of a GTK4
+program. `baseFontSize` gives the size, in points. Thus a program that reads a
+GTK setting and a program that asks fontconfig alone draw with one font.
 
-The font goes to the programs that read a GTK setting or the GTK2 style of Qt.
-A program that asks for the family `sans-serif` gets the font of the system.
-This line gives it the font of the theme too:
+Windows 9x draws its interface with MS Sans Serif at 8 points. `fonts/` holds
+that font, and the flake gives it as `packages.<system>.ms-sans-serif`:
 
 ```nix
-fonts.fontconfig.defaultFonts.sansSerif = [ "MS Sans Serif" ];
+{
+  fonts.packages = [ win-classic-theme.packages.x86_64-linux.ms-sans-serif ];
+  fonts.fontconfig.defaultFonts.sansSerif = [ "MS Sans Serif" ];
+}
 ```
 
-The font draws a pixel grid, so a web page and a document also get that grid.
+The font draws a pixel grid, so a web page and a document also get that grid. A
+configuration that wants that grid in the interface alone names another family
+in the list, and the theme then follows it:
+
+```nix
+{ fonts.fontconfig.defaultFonts.sansSerif = [ "DejaVu Sans" ]; }
+```
+
+A standalone Home Manager reads no NixOS option. It gets the family of
+`osConfig` when Home Manager runs as a NixOS module, and `sans-serif` when it
+runs alone; fontconfig then selects the font.
 
 ### A program that draws its own scroll bar
 

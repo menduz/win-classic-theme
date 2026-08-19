@@ -25,7 +25,7 @@ let
     gtk-icon-theme-name = "${cfg.iconTheme.name}"
     gtk-cursor-theme-name = "${cfg.cursorTheme.name}"
     gtk-cursor-theme-size = ${toString cfg.cursorTheme.size}
-    gtk-font-name = "${cfg.font.name} ${toString cfg.font.size}"
+    gtk-font-name = "${cfg.fontName} ${toString cfg.baseFontSize}"
   '';
 in
 {
@@ -62,7 +62,18 @@ in
       ++ lib.optional (cfg.cursorTheme.package != null) cfg.cursorTheme.package
     );
 
-    fonts.packages = lib.optional (cfg.font.package != null) cfg.font.package;
+    # The theme installs no font. It takes the family of
+    # `fonts.fontconfig.defaultFonts.sansSerif` and writes it in the GTK
+    # settings, so a GTK program and a program that asks fontconfig alone draw
+    # with the same font. The configuration puts the font in `fonts.packages`
+    # and the family in that list.
+    warnings = lib.optional (config.fonts.fontconfig.defaultFonts.sansSerif == [ ]) ''
+      programs.win-classic-theme draws its interface with the family of
+      fonts.fontconfig.defaultFonts.sansSerif, and that list is empty. The
+      theme writes "sans-serif" in the GTK settings, and fontconfig then
+      selects the font. Windows 9x draws with MS Sans Serif; the flake gives
+      that font in `packages.<system>.ms-sans-serif`.
+    '';
 
     # A program that libadwaita draws reads this variable, and no settings file.
     # A session that changes the scheme replaces the value.
