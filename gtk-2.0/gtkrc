@@ -28,13 +28,10 @@ include "combobox.rc"
 include "custom_menubar.rc"
 include "panel.rc"
 
-# Comment the next six lines to stop setting of default font size to accomodate 1080/2160 resolutions.
-style "font"
-{
-font_name = "Dummy Sans 9"
-}
-widget_class "*" style "font"
-gtk-font-name = "Dummy Sans 9"
+# The theme sets no font here. A rule for `widget_class "*"` wins over the
+# `gtk-font-name` of the user, so a font here would reach every GTK2 widget and
+# every Qt widget that the GTK2 style draws. The modules write the sans serif
+# font of fontconfig in the file of the user instead.
 
 style "default"
 {

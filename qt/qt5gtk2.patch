@@ -1,7 +1,0 @@
-diff --git a/src/plugins/styles/gtk2/qgtkstyle_p.cpp b/src/plugins/styles/gtk2/qgtkstyle_p.cpp
-index 2b64a91..b31c4eb 100644
---- a/src/plugins/styles/gtk2/qgtkstyle_p.cpp
-+++ b/src/plugins/styles/gtk2/qgtkstyle_p.cpp
-@@ -546,1 +546,2 @@ QFont QGtkStylePrivate::getThemeFont()
-+        font.setHintingPreference(QFont::PreferFullHinting);
-         QString family = QString::fromLatin1(pango_font_description_get_family(gtk_font));

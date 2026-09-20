@@ -11,7 +11,27 @@
 let
   cfg = config.programs.win-classic-theme;
 
+  # Home Manager gives the NixOS configuration in the special argument
+  # `osConfig`. NixOS gives no such argument, and a standalone Home Manager
+  # gives none either, so the value is an empty set in those two.
+  osConfig = config._module.specialArgs.osConfig or { };
+
   presets = import ./presets.nix;
+
+  # The theme names no font of its own. fontconfig holds the family for
+  # `sans-serif`, and the theme reads that family, so a GTK program and a
+  # program that asks fontconfig alone draw with the same font.
+  #
+  # The NixOS module reads the list of the system. The Home Manager module
+  # reads the list of the user first, and the list of the system after it. The
+  # last name is the family of fontconfig itself: a configuration that names no
+  # font still gets the font that fontconfig selects.
+  sansSerif =
+    (config.fonts.fontconfig.defaultFonts.sansSerif or [ ])
+    ++ (osConfig.fonts.fontconfig.defaultFonts.sansSerif or [ ])
+    ++ [ "sans-serif" ];
+
+  fontName = lib.head sansSerif;
 
   schemeType = lib.types.submodule (
     { name, ... }:
@@ -87,7 +107,7 @@ let
     gtk-cursor-theme-name = cfg.cursorTheme.name;
     # 0 lets the cursor theme select the size.
     gtk-cursor-theme-size = 0;
-    gtk-font-name = "${cfg.font.name} ${toString cfg.font.size}";
+    gtk-font-name = "${fontName} ${toString cfg.baseFontSize}";
     gtk-decoration-layout = cfg.decorationLayout;
     # A Windows 9x window has a title bar, not a header bar with widgets in it.
     gtk-dialogs-use-header = 0;
@@ -142,7 +162,7 @@ let
       margin-bottom: 1px;
     }
     headerbar label.title {
-      font-size: 8pt;
+      font-size: ${toString cfg.baseFontSize}pt;
       background: transparent;
       margin-top: 0;
     }
@@ -170,15 +190,6 @@ in
 {
   options.programs.win-classic-theme = {
     enabled = lib.mkEnableOption "the win-classic-theme desktop theme";
-
-    patchQt = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = ''
-        Whether to use patched Qt GTK2 bridge packages. The patches make Qt 5
-        and Qt 6 use the same font hinting and radio button spacing.
-      '';
-    };
 
     schemes = lib.mkOption {
       type = lib.types.attrsOf schemeType;
@@ -226,23 +237,24 @@ in
       '';
     };
 
-    font = {
-      name = lib.mkOption {
-        type = lib.types.str;
-        default = "Liberation Sans";
-        description = "The interface font.";
-      };
-      size = lib.mkOption {
-        type = lib.types.int;
-        default = 9;
-        description = "The size of the interface font, in points.";
-      };
-      package = lib.mkOption {
-        type = lib.types.nullOr lib.types.package;
-        default = pkgs.liberation_ttf;
-        defaultText = lib.literalExpression "pkgs.liberation_ttf";
-        description = "The package that holds the interface font.";
-      };
+    baseFontSize = lib.mkOption {
+      type = lib.types.int;
+      default = 8;
+      description = ''
+        The size of the interface font, in points. Windows 9x draws its
+        interface with MS Sans Serif at 8 points.
+
+        The theme takes the family from
+        `fonts.fontconfig.defaultFonts.sansSerif`. Put the font of `fonts/` in
+        `fonts.packages` and that family name in the list to get the font of
+        Windows 9x.
+
+        The font of `fonts/` draws its glyphs on a grid of 11 pixels to the em,
+        so it gives a whole pixel to each line of a glyph at 11 pixels to the
+        em and at a whole multiple of that. A size of 8 points reaches 11
+        pixels at 99 dots per inch, and 10.67 pixels at the 96 of
+        `fontRendering.dpi`. Set that option to 99 to hold the grid.
+      '';
     };
 
     iconTheme = {
@@ -388,6 +400,17 @@ in
         inherit package;
       };
       description = "The scheme that `variant` selects.";
+    };
+
+    fontName = lib.mkOption {
+      type = lib.types.str;
+      internal = true;
+      readOnly = true;
+      default = fontName;
+      description = ''
+        The family that `fonts.fontconfig.defaultFonts.sansSerif` gives, or
+        `sans-serif` when that list is empty.
+      '';
     };
 
     settings = lib.mkOption {

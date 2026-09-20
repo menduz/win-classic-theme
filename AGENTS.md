@@ -7,6 +7,8 @@
 - Every fix regenerates all the screenshots. Run `update-screenshots` in the development shell, and put the new files in the commit of the fix.
 - This repository forks Redmond 97, it is in the attribution. No need to mention it and its divergences in code comments anywhere else.
 - Keep CSS code comments MINIMAL, these are almost never useful.
+- Do NOT correct a fault with a patch to GTK, to Qt or to a style bridge such as `qtstyleplugins` and `qt6gtk2`. The correction stays in the theme: the style sheets, the resource files and the images.
+- If a fault has its cause in a toolkit, report the cause and stop. Do not change the toolkit, and do not change the theme to compensate for it.
 
 # Writing style
 

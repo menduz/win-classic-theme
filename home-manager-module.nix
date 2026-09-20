@@ -10,21 +10,12 @@
 let
   cfg = config.programs.win-classic-theme;
 
-  patchedQtStyles =
-    let
-      styles = pkgs.callPackage ./qt { };
-    in
-    [
-      styles.qt5
-      styles.qt6
-    ];
-
-  qtPackageSettings = lib.optionalAttrs cfg.patchQt {
-    package = patchedQtStyles;
-  };
-
   themeAttrs = {
     inherit (cfg.theme) name package;
+  };
+
+  iconThemeAttrs = {
+    inherit (cfg.iconTheme) name package;
   };
 in
 {
@@ -54,22 +45,34 @@ in
   config = lib.mkIf cfg.enabled {
     home.packages = lib.mkIf cfg.installPackages (lib.attrValues cfg.packages);
 
+    # fontconfig reads the profile of the user only with this option. A
+    # configuration that puts the interface font in `home.packages`, and not in
+    # the `fonts.packages` of NixOS, needs it.
+    fonts.fontconfig.enable = lib.mkDefault true;
+
     gtk = {
       enable = true;
 
+      # The family comes from `fonts.fontconfig.defaultFonts.sansSerif` of the
+      # system. The theme installs no font.
       font = {
-        inherit (cfg.font) name size package;
+        name = cfg.fontName;
+        size = cfg.baseFontSize;
       };
-      iconTheme = {
-        inherit (cfg.iconTheme) name package;
-      };
+      iconTheme = iconThemeAttrs;
       cursorTheme = {
         inherit (cfg.cursorTheme) name package size;
       };
       colorScheme = if cfg.theme.dark then "dark" else "light";
 
       # The Qt style of GTK2 reads ~/.gtkrc-2.0, so a Qt program needs this file.
-      gtk2.theme = themeAttrs;
+      # It takes the icon of a button, of a tab and of a menu item from the icon
+      # theme in the same file. Without that key a Qt window shows an empty
+      # place at each icon.
+      gtk2 = {
+        theme = themeAttrs;
+        iconTheme = iconThemeAttrs;
+      };
 
       gtk3 = {
         theme = themeAttrs;
@@ -106,16 +109,12 @@ in
       };
     };
 
+    # Home Manager gives the two bridge packages of `gtk2` itself, the ones of
+    # nixpkgs. The theme patches neither of them.
     qt = lib.mkIf cfg.qt.enable {
       enable = true;
-      platformTheme = {
-        name = "gtk2";
-      }
-      // qtPackageSettings;
-      style = {
-        name = "gtk2";
-      }
-      // qtPackageSettings;
+      platformTheme.name = "gtk2";
+      style.name = "gtk2";
     };
   };
 }

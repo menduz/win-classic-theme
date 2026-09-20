@@ -8,9 +8,11 @@
 # `screenshots/` in the working tree.
 {
   lib,
+  callPackage,
   runCommand,
   runCommandCC,
   writeShellApplication,
+  writeText,
   makeFontsConf,
   pkg-config,
   glib,
@@ -27,18 +29,16 @@
   xdotool,
   imagemagick,
   adwaita-icon-theme,
+  chicago95,
   librsvg,
   liberation_ttf,
+  opensnitch-ui,
   themes,
 
   # The scheme of the screenshots of the demos. AGENTS.md asks for this one.
   demoTheme ? "win-classic-standard",
 }:
 let
-  qtStyles = import ../qt {
-    inherit libsForQt5 qt6Packages;
-  };
-
   # The window with one widget of each kind. The screenshot script starts it.
   showcase =
     runCommandCC "win-classic-showcase"
@@ -55,6 +55,13 @@ let
         $CC -O2 -Wall -o "$out/bin/showcase" ${./showcase.c} \
           $(pkg-config --cflags --libs gtk+-3.0)
       '';
+
+  disableProgressPulse = runCommandCC "win-classic-disable-progress-pulse" { } ''
+    mkdir -p "$out/lib"
+    $CC -shared -fPIC -O2 -Wall -Wextra \
+      -o "$out/lib/disable-progress-pulse.so" \
+      ${./disable-progress-pulse.c}
+  '';
 
   makeQtShowcase =
     {
@@ -89,18 +96,39 @@ let
   qt5Showcase = makeQtShowcase {
     name = "qt5-showcase";
     inherit (libsForQt5) qtbase wrapQtAppsHook;
-    stylePlugin = qtStyles.qt5;
+    stylePlugin = libsForQt5.qtstyleplugins;
     pkgConfigName = "Qt5Widgets";
   };
 
   qt6Showcase = makeQtShowcase {
     name = "qt6-showcase";
     inherit (qt6Packages) qtbase wrapQtAppsHook;
-    stylePlugin = qtStyles.qt6;
+    stylePlugin = qt6Packages.qt6gtk2;
     pkgConfigName = "Qt6Widgets";
   };
 
-  fontsConf = makeFontsConf { fontDirectories = [ liberation_ttf ]; };
+  # The interface font of the theme. Liberation stays beside it, because the
+  # pixel font holds no glyph for the arrows and the marks of a widget factory.
+  msSansSerif = callPackage ../fonts { };
+
+  baseFontsConf = makeFontsConf {
+    fontDirectories = [
+      msSansSerif
+      liberation_ttf
+    ];
+  };
+
+  # `makeFontsConf` reads the font directories of a package, and not its
+  # `etc/fonts/conf.d`. The rule of the font package comes in here, so the
+  # screenshots show the text of a session of a user.
+  fontsConf = writeText "win-classic-fonts.conf" ''
+    <?xml version="1.0"?>
+    <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+    <fontconfig>
+      <include>${baseFontsConf}</include>
+      <include>${msSansSerif}/etc/fonts/conf.d/60-ms-sans-serif.conf</include>
+    </fontconfig>
+  '';
 
   # The X server, the window manager and the applications, with an environment
   # that holds no setting of the user.
@@ -118,6 +146,7 @@ let
       showcase
       qt5Showcase
       qt6Showcase
+      opensnitch-ui
       gtk3.dev # gtk3-widget-factory
       gtk4.dev # gtk4-widget-factory
     ];
@@ -127,6 +156,10 @@ let
       export XDG_DATA_DIRS=${
         lib.concatStringsSep ":" [
           "${xfconf}/share"
+          # The icon theme of the modules. Adwaita stays behind it, as in the
+          # profile of a user: the modules take the cursor from that package,
+          # and a toolkit reads it for an icon that Chicago95 does not hold.
+          "${chicago95}/share"
           "${adwaita-icon-theme}/share"
           (glib.getSchemaDataDirPath gtk3)
           (glib.getSchemaDataDirPath gtk4)
@@ -138,6 +171,11 @@ let
       export GDK_PIXBUF_MODULE_FILE=${librsvg}/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
       export FONTCONFIG_FILE=${fontsConf}
       export DBUS_SESSION_CONF=${dbus}/share/dbus-1/session.conf
+      # opensnitch-ui comes from the package set, and its wrapper knows the
+      # plugins of Qt6 but not the style of this theme. Qt reads the style from
+      # this variable, and the wrapper keeps the value.
+      export QT_PLUGIN_PATH=${qt6Packages.qt6gtk2}/lib/qt-6/plugins
+      export GTK_FACTORY_PULSE_BLOCKER=${disableProgressPulse}/lib/disable-progress-pulse.so
       exec bash ${./screenshot.sh} "$@"
     '';
   };

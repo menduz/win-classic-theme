@@ -74,6 +74,41 @@ tokens. The build replaces each token with a color. These files hold tokens:
 Do not change a color in a style sheet by hand. The build ignores your change
 on the next build of a different scheme. Add a token in its place.
 
+## The interface font
+
+`fonts/` holds the two files of the FontStruction "MS Sans Serif" by "lou",
+each one with the license and the readme of the author. `fonts/default.nix`
+makes the package, and the flake gives it as `packages.<system>.ms-sans-serif`.
+The theme itself holds no font: the package of a scheme and the package of the
+font are two different packages.
+
+The modules install no font either. They read the first family of
+`fonts.fontconfig.defaultFonts.sansSerif` and write it in the GTK settings, so
+a configuration that wants this font puts the package in `fonts.packages` and
+the name "MS Sans Serif" in that list. The Home Manager module reads the list
+of the user first, then the list of the system through the special argument
+`osConfig`, and `sans-serif` at the end.
+
+The bold file gives itself the family "MS Sans Serif Bold" and the style
+"Regular". A toolkit that asks for bold text then draws a fake bold of the
+regular file. `fonts/name-bold.py` writes the name table of that file again in
+the build: the family becomes "MS Sans Serif" and the style becomes "Bold".
+Thus the two files make one family with two styles, and a description such as
+`MS Sans Serif Bold 8` finds the second file. The files in Git stay as the
+author made them.
+
+The font puts each line of a glyph on a whole pixel at 8 points and 96 dpi,
+which is the size of the interface of Windows 9x. `baseFontSize` changes it.
+The screenshots below use that size.
+
+An antialiased line gets a gray edge, thus the text of a pixel font becomes
+blurry. `fonts/60-ms-sans-serif.conf` stops the antialiasing of this family
+alone, and the font package puts that file in `etc/fonts/conf.d`. fontconfig
+reads that directory of each package of `fonts.packages`, so the rule comes to
+every toolkit. A GTK program also reads the keys of `fontRendering`, but a Qt
+program reads fontconfig alone: without this file the text of a Qt6 window is
+blurry and the text of a GTK window is sharp.
+
 ## How the build makes the screenshots
 
 `dev/screenshot.sh` starts an X server with Xvfb, an Xfwm4 with the theme, and
@@ -111,9 +146,22 @@ For each scheme, two more screenshots show `dev/qt-showcase.cpp`, built with
 Qt5 and Qt6. The Qt5 program uses `qtstyleplugins`, and the Qt6 program uses
 `qt6gtk2`. Both plugins read the GTK2 style sheet of the built theme.
 
-The showcase screenshot is the same on every build. The screenshots of the two
-widget factories are not the same. Those programs move a progress bar on a
-timer. Thus some pixels of them change from one build to the next build.
+The last two screenshots of a scheme show `opensnitch-ui`, a program of PyQt6.
+They are a reference for the widgets that no showcase here holds: a tool box, a
+tab bar with icons and a table of events. `<name>-opensnitch.png` holds the
+main window and `<name>-opensnitch-prefs.png` holds the Preferences dialog. No
+daemon runs in the sandbox, thus the window shows no event and no node.
+
+The program keeps its window in the system tray, and it shows that window when
+a second program of the same name asks for it through its local socket. The
+script starts a second one for that reason. It then opens the Preferences
+dialog with a click on the second button of the tool bar. `prefs_button_x` and
+`prefs_button_y` in `dev/screenshot.sh` give the place of that button. The
+script waits for the dialog, so the build stops if the button moves.
+
+The screenshot command disables the timed progress indicators in the two
+widget factories. Thus repeated builds produce the same pixels. `nix build
+--rebuild .#screenshots` compares a second build with the first one.
 
 The files of this section are not part of the theme. `default.nix` keeps them
 out of the source. Thus a new screenshot does not build the theme again.
