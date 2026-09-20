@@ -12,6 +12,7 @@
   runCommand,
   runCommandCC,
   writeShellApplication,
+  writeText,
   makeFontsConf,
   pkg-config,
   glib,
@@ -38,10 +39,6 @@
   demoTheme ? "win-classic-standard",
 }:
 let
-  qtStyles = import ../qt {
-    inherit libsForQt5 qt6Packages;
-  };
-
   # The window with one widget of each kind. The screenshot script starts it.
   showcase =
     runCommandCC "win-classic-showcase"
@@ -99,14 +96,14 @@ let
   qt5Showcase = makeQtShowcase {
     name = "qt5-showcase";
     inherit (libsForQt5) qtbase wrapQtAppsHook;
-    stylePlugin = qtStyles.qt5;
+    stylePlugin = libsForQt5.qtstyleplugins;
     pkgConfigName = "Qt5Widgets";
   };
 
   qt6Showcase = makeQtShowcase {
     name = "qt6-showcase";
     inherit (qt6Packages) qtbase wrapQtAppsHook;
-    stylePlugin = qtStyles.qt6;
+    stylePlugin = qt6Packages.qt6gtk2;
     pkgConfigName = "Qt6Widgets";
   };
 
@@ -114,12 +111,24 @@ let
   # pixel font holds no glyph for the arrows and the marks of a widget factory.
   msSansSerif = callPackage ../fonts { };
 
-  fontsConf = makeFontsConf {
+  baseFontsConf = makeFontsConf {
     fontDirectories = [
       msSansSerif
       liberation_ttf
     ];
   };
+
+  # `makeFontsConf` reads the font directories of a package, and not its
+  # `etc/fonts/conf.d`. The rule of the font package comes in here, so the
+  # screenshots show the text of a session of a user.
+  fontsConf = writeText "win-classic-fonts.conf" ''
+    <?xml version="1.0"?>
+    <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+    <fontconfig>
+      <include>${baseFontsConf}</include>
+      <include>${msSansSerif}/etc/fonts/conf.d/60-ms-sans-serif.conf</include>
+    </fontconfig>
+  '';
 
   # The X server, the window manager and the applications, with an environment
   # that holds no setting of the user.
@@ -165,7 +174,7 @@ let
       # opensnitch-ui comes from the package set, and its wrapper knows the
       # plugins of Qt6 but not the style of this theme. Qt reads the style from
       # this variable, and the wrapper keeps the value.
-      export QT_PLUGIN_PATH=${qtStyles.qt6}/lib/qt-6/plugins
+      export QT_PLUGIN_PATH=${qt6Packages.qt6gtk2}/lib/qt-6/plugins
       export GTK_FACTORY_PULSE_BLOCKER=${disableProgressPulse}/lib/disable-progress-pulse.so
       exec bash ${./screenshot.sh} "$@"
     '';

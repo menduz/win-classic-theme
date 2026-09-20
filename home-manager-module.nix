@@ -10,19 +10,6 @@
 let
   cfg = config.programs.win-classic-theme;
 
-  patchedQtStyles =
-    let
-      styles = pkgs.callPackage ./qt { };
-    in
-    [
-      styles.qt5
-      styles.qt6
-    ];
-
-  qtPackageSettings = lib.optionalAttrs cfg.patchQt {
-    package = patchedQtStyles;
-  };
-
   themeAttrs = {
     inherit (cfg.theme) name package;
   };
@@ -122,16 +109,12 @@ in
       };
     };
 
+    # Home Manager gives the two bridge packages of `gtk2` itself, the ones of
+    # nixpkgs. The theme patches neither of them.
     qt = lib.mkIf cfg.qt.enable {
       enable = true;
-      platformTheme = {
-        name = "gtk2";
-      }
-      // qtPackageSettings;
-      style = {
-        name = "gtk2";
-      }
-      // qtPackageSettings;
+      platformTheme.name = "gtk2";
+      style.name = "gtk2";
     };
   };
 }

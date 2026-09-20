@@ -191,15 +191,6 @@ in
   options.programs.win-classic-theme = {
     enabled = lib.mkEnableOption "the win-classic-theme desktop theme";
 
-    patchQt = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = ''
-        Whether to use patched Qt GTK2 bridge packages. The patches make Qt 5
-        and Qt 6 use the same font hinting and radio button spacing.
-      '';
-    };
-
     schemes = lib.mkOption {
       type = lib.types.attrsOf schemeType;
       default = {

@@ -262,7 +262,6 @@ in the store. A new window takes the new scheme; an open one needs a restart.
 | Option                      | Default            | Meaning                                            |
 | --------------------------- | ------------------ | -------------------------------------------------- |
 | `enabled`                   | `false`            | whether the module writes anything                  |
-| `patchQt`                   | `false`            | whether to use the patched Qt GTK2 bridges          |
 | `schemes`                   | `dark`, `standard` | the schemes to build                                |
 | `variant`                   | `"dark"`           | the scheme that the session starts with             |
 | `titlebarButtons`           | all                | the buttons of a title bar                          |

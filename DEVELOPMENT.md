@@ -101,6 +101,14 @@ The font puts each line of a glyph on a whole pixel at 8 points and 96 dpi,
 which is the size of the interface of Windows 9x. `baseFontSize` changes it.
 The screenshots below use that size.
 
+An antialiased line gets a gray edge, thus the text of a pixel font becomes
+blurry. `fonts/60-ms-sans-serif.conf` stops the antialiasing of this family
+alone, and the font package puts that file in `etc/fonts/conf.d`. fontconfig
+reads that directory of each package of `fonts.packages`, so the rule comes to
+every toolkit. A GTK program also reads the keys of `fontRendering`, but a Qt
+program reads fontconfig alone: without this file the text of a Qt6 window is
+blurry and the text of a GTK window is sharp.
+
 ## How the build makes the screenshots
 
 `dev/screenshot.sh` starts an X server with Xvfb, an Xfwm4 with the theme, and
