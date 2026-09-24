@@ -72,10 +72,17 @@ tokens. The build replaces each token with a color. These files hold tokens:
 | `index.theme`                                    | `themename`                     |
 
 `aurorae.nix` makes the KWin decoration, an Aurorae theme. It holds no token.
-It writes each SVG file from pixel maps, with one character for each pixel,
-and takes the colors from the scheme. The pixel maps are those of `xfwm4/`:
+`pixelmap.nix` writes each SVG file from pixel maps, with one character for
+each pixel, and the file takes the colors from the scheme. The pixel maps are those of `xfwm4/`:
 a frame of 5 pixels, a title bar of 18 rows and buttons of 16 by 14 pixels.
 Thus the two window managers draw the same title bar.
+
+`plasma.nix` makes the Plasma style the same way: the panel, the task buttons,
+the frame of a pop-up window and the tool tip. The task manager fills the full
+height of the panel, thus each task button holds its gaps in its own frame. The
+button of the active window is pressed, with a pattern of highlight and window
+color. The file `colors` gives the colors of the text and of the lists. Plasma
+takes a part that the style does not hold from its default style.
 
 Do not change a color in a style sheet by hand. The build ignores your change
 on the next build of a different scheme. Add a token in its place.
@@ -135,7 +142,9 @@ above the list on the left. Thus it hides no important widget.
 
 `<name>-plasma.png` holds the same windows on a Plasma desktop. The script
 starts KWin for X11 and `plasmashell` in place of Xfwm4. KWin draws the title
-bars with the Aurorae decoration of the theme. The panel at the bottom
+bars with the Aurorae decoration of the theme, and `plasmashell` draws the
+panel with the Plasma style of the theme. The script sets the fonts and the
+icon theme of the other screenshots in `kdeglobals`. The panel at the bottom
 holds the application launcher, the task manager and the clock. A look and feel
 package that the script writes gives that layout and the color of the desktop.
 libfaketime stops the clock at one time, thus each build gives the same pixels.
@@ -365,6 +374,8 @@ share/themes/<name>/
 └── LICENSE
 share/aurorae/themes/<name>/
                 the KWin decoration
+share/plasma/desktoptheme/<name>/
+                the Plasma style
 ```
 
 ## Notes

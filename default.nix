@@ -230,12 +230,28 @@ let
     "GradientInactiveTitle"="${wine cfg.inactivetitle}"
   '';
 
+  schemeColors = cfg // {
+    inherit highlight shadow disabledfg;
+  };
+
   aurorae = import ./aurorae.nix {
     inherit lib name;
-    colors = cfg // {
-      inherit highlight shadow;
-    };
+    colors = schemeColors;
   };
+
+  plasma = import ./plasma.nix {
+    inherit lib name;
+    colors = schemeColors;
+  };
+
+  # Write a set of generated files below a directory.
+  installFiles =
+    dir: files:
+    lib.concatStrings (
+      lib.mapAttrsToList (file: text: ''
+        install -D -m 644 ${builtins.toFile (baseNameOf file) text} ${dir}/${lib.escapeShellArg file}
+      '') files
+    );
 in
 stdenv.mkDerivation {
   pname = name;
@@ -264,6 +280,8 @@ stdenv.mkDerivation {
         "qt"
         "README.md"
         "aurorae.nix"
+        "pixelmap.nix"
+        "plasma.nix"
         "result"
         "screenshots"
       ]);
@@ -424,13 +442,8 @@ stdenv.mkDerivation {
     cp -r gtk-2.0 gtk-3.0 gtk-4.0 xfwm4 index.theme LICENSE "$theme"/
     cp ${builtins.toFile "theme.reg" wineReg} "$theme"/wine/${name}.reg
 
-    decoration=$out/share/aurorae/themes/${name}
-    mkdir -p "$decoration"
-    ${lib.concatStrings (
-      lib.mapAttrsToList (file: text: ''
-        cp ${builtins.toFile file text} "$decoration"/${lib.escapeShellArg file}
-      '') aurorae
-    )}
+    ${installFiles "$out/share/aurorae/themes/${name}" aurorae}
+    ${installFiles "$out/share/plasma/desktoptheme/${name}" plasma}
 
     runHook postInstall
   '';

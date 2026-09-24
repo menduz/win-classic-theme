@@ -1,6 +1,6 @@
 # win-classic-theme
 
-A Windows 9x theme for GTK2, GTK3, GTK4, Xfwm4 and KWin. It is a Nix build of
+A Windows 9x theme for GTK2, GTK3, GTK4, Xfwm4, KWin and Plasma. It is a Nix build of
 [Redmond97 SE](https://codeberg.org/Sliver_X/Redmond97-SE) by Sliver X.
 
 [DEVELOPMENT.md](DEVELOPMENT.md) tells how the build works.
@@ -292,6 +292,14 @@ library=org.kde.kwin.aurorae.v2
 theme=__aurorae__svg__win-classic-standard
 ButtonsOnLeft=M
 ButtonsOnRight=IAX
+```
+
+Plasma reads the panel style from `share/plasma/desktoptheme/<name>`. Select
+it in System Settings, or write these keys in `~/.config/plasmarc`:
+
+```ini
+[Theme]
+name=win-classic-standard
 ```
 
 ### The interface font

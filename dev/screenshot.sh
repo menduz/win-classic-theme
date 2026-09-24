@@ -271,8 +271,9 @@ shot_showcase() {
 }
 
 # The windows of shot_showcase on a Plasma desktop. KWin draws the title bars
-# with the Aurorae decoration of the theme. The panel at the bottom holds the
-# application launcher, the task manager and the clock.
+# with the Aurorae decoration of the theme, and plasmashell draws the panel with
+# the Plasma style of the theme. The panel at the bottom holds the application
+# launcher, the task manager and the clock.
 shot_plasma() {
   local plasma_home=$work/plasma
   local layout=$plasma_home/share/plasma/look-and-feel/win-classic
@@ -280,8 +281,9 @@ shot_plasma() {
   # showcase keeps the environment of the other screenshots.
   local plasma_vars=(
     PATH="$PLASMA_ENV/bin:$PATH"
-    # The package of the theme holds the KWin decoration in share/aurorae.
-    XDG_DATA_DIRS="$plasma_home/share:$(dirname "$(dirname "$theme_dir")"):$PLASMA_ENV/share"
+    # The package of the theme holds the KWin decoration and the Plasma style.
+    # The icon theme comes after the Plasma packages.
+    XDG_DATA_DIRS="$plasma_home/share:$(dirname "$(dirname "$theme_dir")"):$PLASMA_ENV/share:$XDG_DATA_DIRS"
     XDG_CONFIG_DIRS="$plasma_home/xdg"
     XDG_RUNTIME_DIR="$work/plasma-run"
     QT_PLUGIN_PATH="$PLASMA_ENV/lib/qt-6/plugins"
@@ -328,8 +330,14 @@ JS
 [KDE]
 LookAndFeelPackage=win-classic
 
+[General]
+font=MS Sans Serif,8,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+
+[Icons]
+Theme=Chicago95
+
 [WM]
-activeFont=MS Sans Serif,8,-1,5,700,0,0,0,0,0
+activeFont=MS Sans Serif,8,-1,5,700,0,0,0,0,0,0,0,0,0,0,1
 INI
   # The decoration of the theme, with the buttons of decorationLayout.
   cat >"$plasma_home/xdg/kwinrc" <<INI
@@ -341,6 +349,8 @@ ButtonsOnRight=IAX
 BorderSize=Normal
 BorderSizeAuto=false
 INI
+  printf '[Theme]\nname=%s\n' "$name" >"$plasma_home/xdg/plasmarc"
+
 
   start_x 920x730
   # Plasma starts services on the session bus, and the next screenshots must
