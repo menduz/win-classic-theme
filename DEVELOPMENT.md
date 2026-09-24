@@ -147,6 +147,11 @@ panel with the Plasma style of the theme. The script sets the fonts and the
 icon theme of the other screenshots in `kdeglobals`. The panel at the bottom
 holds the application launcher, the task manager and the clock. A look and feel
 package that the script writes gives that layout and the color of the desktop.
+The launcher is the Application Menu, which opens its categories in submenus
+as Windows does. The script writes a desktop entry for each program of the
+screenshots, opens the menu and then the first category. `launcher_x`,
+`launcher_y`, `category_x` and `category_y` in `dev/screenshot.sh` give the
+places of the clicks. The showcase opens no menu of its own in this screenshot.
 libfaketime stops the clock at one time, thus each build gives the same pixels.
 Plasma starts services on the session bus, so this screenshot has a bus of its
 own. `plasma` in `dev/screenshots.nix` holds the packages of Plasma.

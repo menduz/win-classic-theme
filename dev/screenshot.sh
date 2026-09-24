@@ -15,7 +15,8 @@
 # It writes eight files in the output directory:
 #
 #     <name>.png                  a desktop with two windows and an open menu
-#     <name>-plasma.png           the same windows on a Plasma desktop
+#     <name>-plasma.png           the same windows on a Plasma desktop, with
+#                                 the menu of the application launcher open
 #     <name>-widgets.png          the window of gtk3-widget-factory
 #     <name>-widgets-gtk4.png     the window of gtk4-widget-factory
 #     <name>-widgets-qt5.png      the Qt5 widget showcase
@@ -53,6 +54,13 @@ factory_height=720
 # window below the title bar.
 prefs_button_x=91
 prefs_button_y=20
+
+# The application launcher on the Plasma panel, and the first category of its
+# menu. The Plasma screenshot opens that category.
+launcher_x=12
+launcher_y=716
+category_x=150
+category_y=537
 
 work=$(mktemp -d)
 xvfb_pid=""
@@ -273,7 +281,8 @@ shot_showcase() {
 # The windows of shot_showcase on a Plasma desktop. KWin draws the title bars
 # with the Aurorae decoration of the theme, and plasmashell draws the panel with
 # the Plasma style of the theme. The panel at the bottom holds the application
-# launcher, the task manager and the clock.
+# launcher, the task manager and the clock. The menu of the launcher is open,
+# with the submenu of its first category.
 shot_plasma() {
   local plasma_home=$work/plasma
   local layout=$plasma_home/share/plasma/look-and-feel/win-classic
@@ -284,7 +293,8 @@ shot_plasma() {
     # The package of the theme holds the KWin decoration and the Plasma style.
     # The icon theme comes after the Plasma packages.
     XDG_DATA_DIRS="$plasma_home/share:$(dirname "$(dirname "$theme_dir")"):$PLASMA_ENV/share:$XDG_DATA_DIRS"
-    XDG_CONFIG_DIRS="$plasma_home/xdg"
+    XDG_CONFIG_DIRS="$plasma_home/xdg:$PLASMA_ENV/etc/xdg"
+    XDG_MENU_PREFIX=plasma-
     XDG_RUNTIME_DIR="$work/plasma-run"
     QT_PLUGIN_PATH="$PLASMA_ENV/lib/qt-6/plugins"
     QML_IMPORT_PATH="$PLASMA_ENV/lib/qt-6/qml"
@@ -314,7 +324,11 @@ var panel = new Panel;
 panel.location = "bottom";
 panel.height = 28;
 panel.floating = false;
-panel.addWidget("org.kde.plasma.kickoff");
+var launcher = panel.addWidget("org.kde.plasma.kicker");
+launcher.currentConfigGroup = ["General"];
+launcher.writeConfig("showRecentApps", false);
+launcher.writeConfig("showRecentDocs", false);
+launcher.writeConfig("showIconsRootLevel", true);
 var tasks = panel.addWidget("org.kde.plasma.taskmanager");
 tasks.currentConfigGroup = ["General"];
 tasks.writeConfig("launchers", "");
@@ -351,6 +365,26 @@ BorderSizeAuto=false
 INI
   printf '[Theme]\nname=%s\n' "$name" >"$plasma_home/xdg/plasmarc"
 
+  # The programs of the screenshots, in the menu of the application launcher.
+  mkdir -p "$plasma_home/share/applications"
+  local entry
+  for entry in \
+    "showcase|Win Classic Showcase|preferences-desktop-theme|Settings;" \
+    "gtk3-widget-factory|GTK3 Widget Factory|applications-development|Development;" \
+    "gtk4-widget-factory|GTK4 Widget Factory|applications-development|Development;" \
+    "qt5-showcase|Qt5 Showcase|applications-development|Development;" \
+    "qt6-showcase|Qt6 Showcase|applications-development|Development;" \
+    "opensnitch-ui|OpenSnitch|security-high|Network;"; do
+    IFS='|' read -r exec entry_name icon categories <<<"$entry"
+    cat >"$plasma_home/share/applications/$exec.desktop" <<DESKTOP
+[Desktop Entry]
+Type=Application
+Name=$entry_name
+Exec=$exec
+Icon=$icon
+Categories=$categories
+DESKTOP
+  done
 
   start_x 920x730
   # Plasma starts services on the session bus, and the next screenshots must
@@ -376,11 +410,23 @@ INI
   wait_for xdotool search --class plasmashell
   sleep 5 # the panel and the wallpaper draw
 
+  # The menu of the launcher is open in place of the menu of the showcase.
   rm -f "$work/ready"
-  READY_FILE=$work/ready SHOWCASE_TITLE=$name showcase >"$work/showcase-plasma.log" 2>&1 &
+  SHOWCASE_NO_MENU=1 READY_FILE=$work/ready SHOWCASE_TITLE=$name showcase \
+    >"$work/showcase-plasma.log" 2>&1 &
   app_pid=$!
   wait_for test -s "$work/ready"
-  sleep 2 # the menu opens and the task manager shows the windows
+  sleep 2 # the task manager shows the windows
+
+  xdotool mousemove "$launcher_x" "$launcher_y" click 1
+  sleep 4 # the menu opens
+  # Qt Quick takes a click on an item after the pointer moves over it.
+  xdotool mousemove $((category_x - 10)) $((category_y - 7))
+  sleep 0.5
+  xdotool mousemove "$category_x" "$category_y"
+  sleep 0.5
+  xdotool click 1
+  sleep 4 # the submenu opens
 
   magick import -window root -screen "$out_dir/$name-plasma.png"
   stop_x

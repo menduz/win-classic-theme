@@ -5,7 +5,7 @@
  * The program writes the file in READY_FILE when the windows are on the screen
  * and the first menu is open. The script waits for that file. Without
  * READY_FILE the program is a plain preview: it opens no menu and writes
- * nothing.
+ * nothing. With SHOWCASE_NO_MENU it writes the file and opens no menu.
  */
 
 #include <gtk/gtk.h>
@@ -25,7 +25,8 @@ on_settled (gpointer data)
   if (path == NULL)
     return G_SOURCE_REMOVE;
 
-  gtk_menu_shell_select_item (GTK_MENU_SHELL (menu_bar), file_item);
+  if (g_getenv ("SHOWCASE_NO_MENU") == NULL)
+    gtk_menu_shell_select_item (GTK_MENU_SHELL (menu_bar), file_item);
 
   file = fopen (path, "w");
   if (file == NULL)

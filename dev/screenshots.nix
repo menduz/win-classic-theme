@@ -170,6 +170,8 @@ let
       "/bin"
       "/share"
       "/lib"
+      # The menu file of the application launcher.
+      "/etc/xdg/menus"
     ];
     ignoreCollisions = true;
   };
