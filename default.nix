@@ -282,6 +282,7 @@ stdenv.mkDerivation {
         "aurorae.nix"
         "pixelmap.nix"
         "plasma.nix"
+        "win98se.nix"
         "result"
         "screenshots"
       ]);

@@ -62,6 +62,8 @@
           # configuration puts this package in `fonts.packages` and the name
           # "MS Sans Serif" in that list.
           ms-sans-serif = pkgs.callPackage ./fonts { };
+          # The icon theme of the modules. It inherits Chicago95.
+          se98 = pkgs.callPackage ./win98se.nix { };
         }
       );
 
@@ -125,6 +127,7 @@
       overlays.default = final: prev: {
         win-classic-theme = final.callPackage ./default.nix { };
         ms-sans-serif = final.callPackage ./fonts { };
+        se98 = final.callPackage ./win98se.nix { };
       };
     };
 }

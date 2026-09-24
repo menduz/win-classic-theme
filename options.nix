@@ -260,13 +260,13 @@ in
     iconTheme = {
       name = lib.mkOption {
         type = lib.types.str;
-        default = "Chicago95";
+        default = "SE98";
         description = "The name of the icon theme.";
       };
       package = lib.mkOption {
         type = lib.types.nullOr lib.types.package;
-        default = pkgs.chicago95;
-        defaultText = lib.literalExpression "pkgs.chicago95";
+        default = pkgs.callPackage ./win98se.nix { };
+        defaultText = lib.literalMD "SE98, with Chicago95 for the icons that SE98 does not hold";
         description = "The package that holds the icon theme.";
       };
     };

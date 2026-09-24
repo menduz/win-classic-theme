@@ -272,7 +272,7 @@ in the store. A new window takes the new scheme; an open one needs a restart.
 | `decorationLayout`          | that of the theme  | `gtk-decoration-layout`, the buttons that GTK draws |
 | `windowManagerButtonLayout` | that of the theme  | the buttons that the window manager draws           |
 | `baseFontSize`              | `8`                | the size of the interface font, in points           |
-| `iconTheme`                 | Chicago95          | the icon theme                                      |
+| `iconTheme`                 | SE98               | the icon theme, with Chicago95 for missing icons    |
 | `cursorTheme`               | Adwaita 16         | the cursor theme                                    |
 | `fontRendering`             | 96 dpi, hintslight | antialias, hinting, subpixel order and dpi          |
 | `gtk3Settings`              | `{ }`              | keys to add to the GTK3 settings, or to replace     |
