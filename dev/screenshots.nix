@@ -33,6 +33,9 @@
   librsvg,
   liberation_ttf,
   opensnitch-ui,
+  buildEnv,
+  kdePackages,
+  libfaketime,
   themes,
 
   # The scheme of the screenshots of the demos. AGENTS.md asks for this one.
@@ -130,6 +133,47 @@ let
     </fontconfig>
   '';
 
+  # KWin and the Plasma shell for the Plasma screenshot. NixOS gives these
+  # packages to a Plasma session in its profile, and plasmashell finds its QML
+  # modules and its plugins there. This environment is that profile.
+  plasma = buildEnv {
+    name = "win-classic-plasma";
+    paths = with kdePackages; [
+      kwin-x11
+      plasma-workspace
+      plasma-desktop
+      plasma-integration
+      breeze
+      breeze-icons
+      libplasma
+      plasma5support
+      plasma-activities
+      kactivitymanagerd
+      kded
+      kirigami
+      kirigami-addons
+      qqc2-desktop-style
+      frameworkintegration
+      kservice
+      kio
+      kcmutils
+      ksvg
+      kitemmodels
+      kdeclarative
+      kquickcharts
+      libksysguard
+      qtdeclarative
+      qtsvg
+      qt5compat
+    ];
+    pathsToLink = [
+      "/bin"
+      "/share"
+      "/lib"
+    ];
+    ignoreCollisions = true;
+  };
+
   # The X server, the window manager and the applications, with an environment
   # that holds no setting of the user.
   screenshot = writeShellApplication {
@@ -176,6 +220,9 @@ let
       # this variable, and the wrapper keeps the value.
       export QT_PLUGIN_PATH=${qt6Packages.qt6gtk2}/lib/qt-6/plugins
       export GTK_FACTORY_PULSE_BLOCKER=${disableProgressPulse}/lib/disable-progress-pulse.so
+      export PLASMA_ENV=${plasma}
+      # The clock of the Plasma panel shows this time on each build.
+      export FAKETIME_LIB=${libfaketime}/lib/libfaketime.so.1
       exec bash ${./screenshot.sh} "$@"
     '';
   };

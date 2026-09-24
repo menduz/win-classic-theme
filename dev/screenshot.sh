@@ -8,11 +8,14 @@
 # `<store path>/share/themes/<name>`.
 #
 # The script needs Xvfb, Xfwm4, dbus, ImageMagick and the showcase programs in
-# PATH. `dev/screenshots.nix` gives them.
+# PATH. For the Plasma screenshot it needs PLASMA_ENV, a directory that holds
+# KWin, plasmashell and their plugins, and FAKETIME_LIB, the library of
+# libfaketime. `dev/screenshots.nix` gives them.
 #
-# It writes seven files in the output directory:
+# It writes eight files in the output directory:
 #
 #     <name>.png                  a desktop with two windows and an open menu
+#     <name>-plasma.png           the same windows on a Plasma desktop
 #     <name>-widgets.png          the window of gtk3-widget-factory
 #     <name>-widgets-gtk4.png     the window of gtk4-widget-factory
 #     <name>-widgets-qt5.png      the Qt5 widget showcase
@@ -55,16 +58,18 @@ work=$(mktemp -d)
 xvfb_pid=""
 wm_pid=""
 app_pid=""
+plasma_pid=""
 bus_pid=""
 
 kill_all() {
   local pid
-  for pid in "$app_pid" "$wm_pid" "$xvfb_pid"; do
+  for pid in "$app_pid" "$plasma_pid" "$wm_pid" "$xvfb_pid"; do
     if [ -n "$pid" ]; then
       kill "$pid" 2>/dev/null || true
     fi
   done
   app_pid=""
+  plasma_pid=""
   wm_pid=""
   xvfb_pid=""
   wait 2>/dev/null || true
@@ -265,6 +270,99 @@ shot_showcase() {
   stop_x
 }
 
+# The windows of shot_showcase on a Plasma desktop. KWin draws the title bars.
+# The theme has no KWin decoration, thus the title bars are the Breeze ones.
+# The panel at the bottom holds the application launcher, the task manager and
+# the clock.
+shot_plasma() {
+  local plasma_home=$work/plasma
+  local layout=$plasma_home/share/plasma/look-and-feel/win-classic
+  # KWin, plasmashell and their helpers run with the Plasma environment. The
+  # showcase keeps the environment of the other screenshots.
+  local plasma_vars=(
+    PATH="$PLASMA_ENV/bin:$PATH"
+    XDG_DATA_DIRS="$plasma_home/share:$PLASMA_ENV/share"
+    XDG_CONFIG_DIRS="$plasma_home/xdg"
+    XDG_RUNTIME_DIR="$work/plasma-run"
+    QT_PLUGIN_PATH="$PLASMA_ENV/lib/qt-6/plugins"
+    QML_IMPORT_PATH="$PLASMA_ENV/lib/qt-6/qml"
+    QT_QPA_PLATFORMTHEME=kde
+    QT_FORCE_STDERR_LOGGING=1
+    XDG_CURRENT_DESKTOP=KDE
+    KDE_FULL_SESSION=true
+    KDE_SESSION_VERSION=6
+    # The X server has no OpenGL. KWin then draws no effect and plasmashell
+    # draws with the processor.
+    KWIN_COMPOSE=N
+    QT_XCB_GL_INTEGRATION=none
+    QT_QUICK_BACKEND=software
+  )
+
+  # plasmashell takes the first layout from the look and feel package in
+  # kdeglobals. This package holds the layout alone.
+  rm -rf "$plasma_home" "$work/plasma-run"
+  mkdir -p "$layout/contents/layouts" "$plasma_home/xdg" "$work/plasma-run"
+  chmod 700 "$work/plasma-run"
+  cat >"$layout/metadata.json" <<JSON
+{ "KPackageStructure": "Plasma/LookAndFeel",
+  "KPlugin": { "Id": "win-classic", "Name": "win-classic" } }
+JSON
+  cat >"$layout/contents/layouts/org.kde.plasma.desktop-layout.js" <<'JS'
+var panel = new Panel;
+panel.location = "bottom";
+panel.height = 28;
+panel.floating = false;
+panel.addWidget("org.kde.plasma.kickoff");
+var tasks = panel.addWidget("org.kde.plasma.taskmanager");
+tasks.currentConfigGroup = ["General"];
+tasks.writeConfig("launchers", "");
+panel.addWidget("org.kde.plasma.digitalclock");
+var desktops = desktopsForActivity(currentActivity());
+for (var i = 0; i < desktops.length; i++) {
+  desktops[i].wallpaperPlugin = "org.kde.color";
+  desktops[i].currentConfigGroup = ["Wallpaper", "org.kde.color", "General"];
+  desktops[i].writeConfig("Color", "58,110,165");
+}
+JS
+  printf '[KDE]\nLookAndFeelPackage=win-classic\n' >"$plasma_home/xdg/kdeglobals"
+
+  start_x 920x730
+  # Plasma starts services on the session bus, and the next screenshots must
+  # not find them. Thus this shot has a bus of its own. The bus starts the
+  # services with its environment, thus it starts after the X server.
+  local main_bus=$DBUS_SESSION_BUS_ADDRESS main_bus_pid=$bus_pid
+  # shellcheck disable=SC2016
+  env "${plasma_vars[@]}" bash -c 'eval "$(dbus-launch --sh-syntax \
+    ${DBUS_SESSION_CONF:+--config-file="$DBUS_SESSION_CONF"})" &&
+    echo "$DBUS_SESSION_BUS_ADDRESS $DBUS_SESSION_BUS_PID"' \
+    >"$work/plasma-bus" 2>>"$work/dbus.log"
+  read -r DBUS_SESSION_BUS_ADDRESS bus_pid <"$work/plasma-bus"
+
+  env "${plasma_vars[@]}" kwin_x11 --replace >"$work/kwin.log" 2>&1 &
+  wm_pid=$!
+  wait_for wm_is_up
+  # The clock stops at this time. Qt counts its timers with the monotonic
+  # clock, and libfaketime does not change that one.
+  env "${plasma_vars[@]}" LD_PRELOAD="$FAKETIME_LIB" \
+    FAKETIME="2026-01-01 12:00:00" FAKETIME_DONT_FAKE_MONOTONIC=1 \
+    plasmashell --no-respawn >"$work/plasmashell.log" 2>&1 &
+  plasma_pid=$!
+  wait_for xdotool search --class plasmashell
+  sleep 5 # the panel and the wallpaper draw
+
+  rm -f "$work/ready"
+  READY_FILE=$work/ready SHOWCASE_TITLE=$name showcase >"$work/showcase-plasma.log" 2>&1 &
+  app_pid=$!
+  wait_for test -s "$work/ready"
+  sleep 2 # the menu opens and the task manager shows the windows
+
+  magick import -window root -screen "$out_dir/$name-plasma.png"
+  stop_x
+  kill "$bus_pid" 2>/dev/null || true
+  DBUS_SESSION_BUS_ADDRESS=$main_bus
+  bus_pid=$main_bus_pid
+}
+
 # A window that holds common widgets. The window draws its own frame, so the
 # picture holds the window alone. Each window has the same size for comparison.
 #
@@ -373,6 +471,7 @@ shot_demo() {
 
 files=(
   "$out_dir/$name.png"
+  "$out_dir/$name-plasma.png"
   "$out_dir/$name-widgets.png"
   "$out_dir/$name-widgets-gtk4.png"
   "$out_dir/$name-widgets-qt5.png"
@@ -382,6 +481,7 @@ files=(
 )
 
 shot_showcase
+shot_plasma
 shot_factory gtk3-widget-factory "$out_dir/$name-widgets.png" \
   "${GTK_FACTORY_PULSE_BLOCKER:-}"
 shot_factory gtk4-widget-factory "$out_dir/$name-widgets-gtk4.png" \

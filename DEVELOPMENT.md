@@ -127,6 +127,17 @@ above the list on the left. Thus it hides no important widget.
 
 ![The showcase window with the dark scheme](screenshots/win-classic-dark.png)
 
+`<name>-plasma.png` holds the same windows on a Plasma desktop. The script
+starts KWin for X11 and `plasmashell` in place of Xfwm4. The theme has no KWin
+decoration, thus KWin draws the Breeze title bars. The panel at the bottom
+holds the application launcher, the task manager and the clock. A look and feel
+package that the script writes gives that layout and the color of the desktop.
+libfaketime stops the clock at one time, thus each build gives the same pixels.
+Plasma starts services on the session bus, so this screenshot has a bus of its
+own. `plasma` in `dev/screenshots.nix` holds the packages of Plasma.
+
+![The showcase window on a Plasma desktop](screenshots/win-classic-standard-plasma.png)
+
 `demos/` holds the window of one demo of each toolkit, from
 `gtk3-demo --run=builder` and `gtk4-demo --run=builder`. The script takes those
 two with the `windows-standard` scheme, which AGENTS.md asks for. `demo` in
