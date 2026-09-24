@@ -71,6 +71,12 @@ tokens. The build replaces each token with a color. These files hold tokens:
 | `xfwm4/*.xpm`                                    | `buttonscolor`                  |
 | `index.theme`                                    | `themename`                     |
 
+`aurorae.nix` makes the KWin decoration, an Aurorae theme. It holds no token.
+It writes each SVG file from pixel maps, with one character for each pixel,
+and takes the colors from the scheme. The pixel maps are those of `xfwm4/`:
+a frame of 5 pixels, a title bar of 18 rows and buttons of 16 by 14 pixels.
+Thus the two window managers draw the same title bar.
+
 Do not change a color in a style sheet by hand. The build ignores your change
 on the next build of a different scheme. Add a token in its place.
 
@@ -128,8 +134,8 @@ above the list on the left. Thus it hides no important widget.
 ![The showcase window with the dark scheme](screenshots/win-classic-dark.png)
 
 `<name>-plasma.png` holds the same windows on a Plasma desktop. The script
-starts KWin for X11 and `plasmashell` in place of Xfwm4. The theme has no KWin
-decoration, thus KWin draws the Breeze title bars. The panel at the bottom
+starts KWin for X11 and `plasmashell` in place of Xfwm4. KWin draws the title
+bars with the Aurorae decoration of the theme. The panel at the bottom
 holds the application launcher, the task manager and the clock. A look and feel
 package that the script writes gives that layout and the color of the desktop.
 libfaketime stops the clock at one time, thus each build gives the same pixels.
@@ -357,6 +363,8 @@ share/themes/<name>/
 ├── wine/       a registry file with the same colors
 ├── index.theme
 └── LICENSE
+share/aurorae/themes/<name>/
+                the KWin decoration
 ```
 
 ## Notes

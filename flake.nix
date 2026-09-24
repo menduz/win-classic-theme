@@ -1,5 +1,5 @@
 {
-  description = "win-classic-theme, a Windows 9x theme for GTK2, GTK3, GTK4 and Xfwm4";
+  description = "win-classic-theme, a Windows 9x theme for GTK2, GTK3, GTK4, Xfwm4 and KWin";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";

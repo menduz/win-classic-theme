@@ -229,6 +229,13 @@ let
     "GradientActiveTitle"="${wine cfg.activetitle}"
     "GradientInactiveTitle"="${wine cfg.inactivetitle}"
   '';
+
+  aurorae = import ./aurorae.nix {
+    inherit lib name;
+    colors = cfg // {
+      inherit highlight shadow;
+    };
+  };
 in
 stdenv.mkDerivation {
   pname = name;
@@ -256,6 +263,7 @@ stdenv.mkDerivation {
         "options.nix"
         "qt"
         "README.md"
+        "aurorae.nix"
         "result"
         "screenshots"
       ]);
@@ -415,6 +423,14 @@ stdenv.mkDerivation {
     mkdir -p "$theme"/wine
     cp -r gtk-2.0 gtk-3.0 gtk-4.0 xfwm4 index.theme LICENSE "$theme"/
     cp ${builtins.toFile "theme.reg" wineReg} "$theme"/wine/${name}.reg
+
+    decoration=$out/share/aurorae/themes/${name}
+    mkdir -p "$decoration"
+    ${lib.concatStrings (
+      lib.mapAttrsToList (file: text: ''
+        cp ${builtins.toFile file text} "$decoration"/${lib.escapeShellArg file}
+      '') aurorae
+    )}
 
     runHook postInstall
   '';

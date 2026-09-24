@@ -270,10 +270,9 @@ shot_showcase() {
   stop_x
 }
 
-# The windows of shot_showcase on a Plasma desktop. KWin draws the title bars.
-# The theme has no KWin decoration, thus the title bars are the Breeze ones.
-# The panel at the bottom holds the application launcher, the task manager and
-# the clock.
+# The windows of shot_showcase on a Plasma desktop. KWin draws the title bars
+# with the Aurorae decoration of the theme. The panel at the bottom holds the
+# application launcher, the task manager and the clock.
 shot_plasma() {
   local plasma_home=$work/plasma
   local layout=$plasma_home/share/plasma/look-and-feel/win-classic
@@ -281,7 +280,8 @@ shot_plasma() {
   # showcase keeps the environment of the other screenshots.
   local plasma_vars=(
     PATH="$PLASMA_ENV/bin:$PATH"
-    XDG_DATA_DIRS="$plasma_home/share:$PLASMA_ENV/share"
+    # The package of the theme holds the KWin decoration in share/aurorae.
+    XDG_DATA_DIRS="$plasma_home/share:$(dirname "$(dirname "$theme_dir")"):$PLASMA_ENV/share"
     XDG_CONFIG_DIRS="$plasma_home/xdg"
     XDG_RUNTIME_DIR="$work/plasma-run"
     QT_PLUGIN_PATH="$PLASMA_ENV/lib/qt-6/plugins"
@@ -324,7 +324,23 @@ for (var i = 0; i < desktops.length; i++) {
   desktops[i].writeConfig("Color", "58,110,165");
 }
 JS
-  printf '[KDE]\nLookAndFeelPackage=win-classic\n' >"$plasma_home/xdg/kdeglobals"
+  cat >"$plasma_home/xdg/kdeglobals" <<INI
+[KDE]
+LookAndFeelPackage=win-classic
+
+[WM]
+activeFont=MS Sans Serif,8,-1,5,700,0,0,0,0,0
+INI
+  # The decoration of the theme, with the buttons of decorationLayout.
+  cat >"$plasma_home/xdg/kwinrc" <<INI
+[org.kde.kdecoration2]
+library=org.kde.kwin.aurorae.v2
+theme=__aurorae__svg__$name
+ButtonsOnLeft=M
+ButtonsOnRight=IAX
+BorderSize=Normal
+BorderSizeAuto=false
+INI
 
   start_x 920x730
   # Plasma starts services on the session bus, and the next screenshots must

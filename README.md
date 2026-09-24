@@ -1,6 +1,6 @@
 # win-classic-theme
 
-A Windows 9x theme for GTK2, GTK3, GTK4 and Xfwm4. It is a Nix build of
+A Windows 9x theme for GTK2, GTK3, GTK4, Xfwm4 and KWin. It is a Nix build of
 [Redmond97 SE](https://codeberg.org/Sliver_X/Redmond97-SE) by Sliver X.
 
 [DEVELOPMENT.md](DEVELOPMENT.md) tells how the build works.
@@ -282,6 +282,17 @@ in the store. A new window takes the new scheme; an open one needs a restart.
 
 Xfwm4 reads the theme by name. Set the same name in the property
 `/general/theme` of the channel `xfwm4`.
+
+KWin reads the decoration from `share/aurorae/themes/<name>`. Select it in
+System Settings, or write these keys in `~/.config/kwinrc`:
+
+```ini
+[org.kde.kdecoration2]
+library=org.kde.kwin.aurorae.v2
+theme=__aurorae__svg__win-classic-standard
+ButtonsOnLeft=M
+ButtonsOnRight=IAX
+```
 
 ### The interface font
 
