@@ -80,7 +80,14 @@ in
     environment.sessionVariables.GTK_THEME = cfg.theme.name;
 
     # The Home Manager module writes GSettings keys, and so does a session
-    # that changes the scheme.
-    programs.dconf.enable = true;
+    # that changes the scheme. A GTK program on Wayland reads the icon theme
+    # from GSettings. This database gives the icon theme to each user that has
+    # no value of their own.
+    programs.dconf = {
+      enable = true;
+      profiles.user.databases = [
+        { settings."org/gnome/desktop/interface".icon-theme = cfg.iconTheme.name; }
+      ];
+    };
   };
 }
