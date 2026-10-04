@@ -293,7 +293,7 @@ stdenv.mkDerivation {
   postPatch = ''
     find . -xtype l -delete
     for file in gtk-2.0/gtkrc gtk-3.0/gtk.css gtk-3.0/settings.ini gtk-4.0/settings.ini \
-                index.theme xfwm4/themerc xfwm4/*.xpm; do
+                index.theme xfwm4/themerc xfwm4/*.xpm rofi/win-classic.rasi; do
       substituteInPlace "$file" ${substFlags}
     done
   '';
@@ -440,7 +440,7 @@ stdenv.mkDerivation {
 
     theme=$out/share/themes/${name}
     mkdir -p "$theme"/wine
-    cp -r gtk-2.0 gtk-3.0 gtk-4.0 xfwm4 index.theme LICENSE "$theme"/
+    cp -r gtk-2.0 gtk-3.0 gtk-4.0 xfwm4 rofi index.theme LICENSE "$theme"/
     cp ${builtins.toFile "theme.reg" wineReg} "$theme"/wine/${name}.reg
 
     ${installFiles "$out/share/aurorae/themes/${name}" aurorae}

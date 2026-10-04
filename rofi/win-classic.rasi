@@ -1,0 +1,155 @@
+/* The menu style of the theme for rofi: a raised 3D frame in the window
+   color, a sunken text box, and the selection color on the selected row. The
+   build replaces each @name@ token with a color of the scheme. The font comes
+   from the configuration of rofi. */
+
+* {
+    face:             @bgcolor@;
+    text:             @fgcolor@;
+    frame:            @border@;
+    light:            @highlight@;
+    dark:             @shadow@;
+    selected:         @selectedbg@;
+    selected-text:    @selectedtext@;
+    field:            @basecolor@;
+    field-text:       @basefg@;
+    gray-text:        @disabledfg@;
+
+    background-color: transparent;
+    text-color:       @text;
+    border-color:     @frame;
+    spacing:          0;
+}
+
+/* Each box draws one edge of the window border style: the top and left
+   lines, or the bottom and right lines. */
+window {
+    width:            30em;
+    background-color: @face;
+    border:           0px 1px 1px 0px;
+    border-color:     @frame;
+    padding:          1px 0px 0px 1px;
+}
+
+mainbox {
+    border:           1px 0px 0px 1px;
+    border-color:     @light;
+    children:         [ bevel ];
+}
+
+bevel {
+    border:           0px 1px 1px 0px;
+    border-color:     @dark;
+    padding:          1px 2px;
+    children:         [ inputbar, message, listview, mode-switcher ];
+}
+
+inputbar {
+    padding:          4px 6px;
+    spacing:          6px;
+    children:         [ prompt, sunken-outer ];
+}
+
+prompt {
+    vertical-align:   0.5;
+}
+
+/* A text box: a sunken outer edge in the shadow and highlight colors, and a
+   sunken inner edge in the frame and window colors. */
+sunken-outer {
+    expand:           true;
+    border:           1px 0px 0px 1px;
+    border-color:     @dark;
+    children:         [ sunken-outer-end ];
+}
+
+sunken-outer-end {
+    border:           0px 1px 1px 0px;
+    border-color:     @light;
+    children:         [ sunken-inner ];
+}
+
+sunken-inner {
+    border:           1px 0px 0px 1px;
+    border-color:     @frame;
+    children:         [ sunken-inner-end ];
+}
+
+sunken-inner-end {
+    border:           0px 1px 1px 0px;
+    border-color:     @face;
+    background-color: @field;
+    padding:          2px 3px;
+    children:         [ entry ];
+}
+
+entry {
+    text-color:       @field-text;
+    placeholder-color: @gray-text;
+    cursor:           text;
+}
+
+message {
+    padding:          4px 6px;
+}
+
+textbox {
+    text-color:       @text;
+}
+
+listview {
+    lines:            12;
+    fixed-height:     false;
+    dynamic:          true;
+    scrollbar:        false;
+}
+
+element {
+    padding:          4px 6px;
+    spacing:          6px;
+    cursor:           pointer;
+}
+
+element normal.normal,
+element alternate.normal,
+element normal.active,
+element alternate.active,
+element normal.urgent,
+element alternate.urgent {
+    background-color: @face;
+    text-color:       @text;
+}
+
+element selected.normal,
+element selected.active,
+element selected.urgent {
+    background-color: @selected;
+    text-color:       @selected-text;
+}
+
+element-text,
+element-icon {
+    background-color: inherit;
+    text-color:       inherit;
+    vertical-align:   0.5;
+}
+
+element-icon {
+    size:             16px;
+}
+
+mode-switcher {
+    spacing:          2px;
+    padding:          2px;
+}
+
+button {
+    padding:          4px 6px;
+    background-color: @face;
+    text-color:       @text;
+}
+
+button selected {
+    background-color: @selected;
+    text-color:       @selected-text;
+}

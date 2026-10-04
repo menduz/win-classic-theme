@@ -340,6 +340,18 @@ a dither image, which then hides the text below the bar.
 the slider alone. Give the file to such a program, for example with the
 `gtk-custom-css` key of Ghostty.
 
+## rofi
+
+Each scheme has a rofi theme with the menu style: a raised 3D frame, a sunken
+text box and the selection color on the selected row. The file is
+`share/themes/<name>/rofi/win-classic.rasi` in the package of the scheme. The
+theme gives no font, so rofi uses its own `font` setting.
+
+```nix
+programs.rofi.theme =
+  "${win-classic-theme.packages.${system}.dark}/share/themes/win-classic-dark/rofi/win-classic.rasi";
+```
+
 ## License
 
 GPL 3. See `LICENSE`. The images and the style sheets come from Redmond97 SE by

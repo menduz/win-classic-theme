@@ -70,6 +70,7 @@ tokens. The build replaces each token with a color. These files hold tokens:
 | `xfwm4/themerc`                                  | title bar colors, `xfwmbuttons` |
 | `xfwm4/*.xpm`                                    | `buttonscolor`                  |
 | `index.theme`                                    | `themename`                     |
+| `rofi/win-classic.rasi`                          | the menu and text box colors    |
 
 `aurorae.nix` makes the KWin decoration, an Aurorae theme. It holds no token.
 `pixelmap.nix` writes each SVG file from pixel maps, with one character for
@@ -375,6 +376,7 @@ share/themes/<name>/
 ├── gtk-4.0/    style sheets and settings.ini
 ├── xfwm4/      window decorations
 ├── wine/       a registry file with the same colors
+├── rofi/       a rofi theme with the menu style
 ├── index.theme
 └── LICENSE
 share/aurorae/themes/<name>/
