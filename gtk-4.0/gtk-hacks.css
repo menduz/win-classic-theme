@@ -7,6 +7,8 @@
  **********/
 
 /*Hack to fix dotted outlines around literally everything when pointing to Redmond97's GTK3 theme*/
+/* The outline of the window node is on the frame. */
+window,
 window * {
   outline-style: hidden;
 }

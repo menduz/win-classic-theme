@@ -3,11 +3,30 @@
  ***************/
 
 /* Replicate Xfwm4 window decorations for CSD */
+/* GTK3 draws the frame outside the window geometry. Outer shadows do the same
+   here. A window without compositing has no space outside its geometry. */
 window.csd,
-window.solid-csd,
 window.background.csd,
+window.background.dialog.csd {
+  margin: 0;
+  padding: 0;
+  background-color: @bg_color;
+  border: none;
+  box-shadow:
+    0 0 0 4px @borders,
+    -1px -1px 0 3px @bg_color,
+    0 -1px 0 3px @bg_color,
+    -1px 0 0 3px @bg_color,
+    0 0 0 3px @dark_shadow,
+    -1px -1px 0 2px @light_shadow,
+    0 -1px 0 2px @light_shadow,
+    -1px 0 0 2px @light_shadow,
+    0 0 0 2px @bg_color;
+  border-radius: 0;
+}
+
+window.solid-csd,
 window.background.solid-csd,
-window.background.dialog.csd,
 window.background.dialog.solid-csd {
   padding: 4px;
   background-color: @bg_color;
