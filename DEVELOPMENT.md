@@ -159,10 +159,18 @@ own. `plasma` in `dev/screenshots.nix` holds the packages of Plasma.
 
 ![The showcase window on a Plasma desktop](screenshots/win-classic-standard-plasma.png)
 
-`demos/` holds the window of one demo of each toolkit, from
-`gtk3-demo --run=builder` and `gtk4-demo --run=builder`. The script takes those
-two with the `windows-standard` scheme, which AGENTS.md asks for. `demo` in
-`dev/screenshot.sh` holds the name of the demo.
+`demos/` holds the windows of two demos of each toolkit, from `gtk3-demo` and
+`gtk4-demo`. The script takes them with the `windows-standard` scheme, which
+AGENTS.md asks for. `demos` in `dev/screenshot.sh` holds the names of the demos.
+
+- `builder` shows the widgets of a window. Xfwm4 draws its frame, and the
+  screenshot holds the window without the frame.
+- `headerbar` shows a window with client side decorations. The theme draws its
+  frame, outside the window geometry, as on Wayland. Xfwm4 is a compositing
+  manager for this screenshot. Without compositing, GTK draws the frame with
+  the `solid-csd` style. The frame must be the same as the frame of Xfwm4 in
+  `screenshots/`. GTK4 puts a transparent border around the frame for the
+  resize, and the script removes it.
 
 To add a scheme to `screenshots/`, add its preset to `shown` in `flake.nix`.
 Then run `update-screenshots`.

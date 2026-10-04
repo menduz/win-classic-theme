@@ -24,11 +24,14 @@
 #     <name>-opensnitch.png       the window of opensnitch-ui
 #     <name>-opensnitch-prefs.png the Preferences dialog of opensnitch-ui
 #
-# With a fourth argument it writes the window of one demo of each toolkit in
+# With a fourth argument it writes the window of each demo of each toolkit in
 # that directory:
 #
 #     <demo>-gtk3.png          the window of gtk3-demo --run=<demo>
 #     <demo>-gtk4.png          the window of gtk4-demo --run=<demo>
+#
+# The demos are `builder` and `headerbar`. The window of `headerbar` has client
+# side decorations. The theme draws its frame, and the screenshot holds it.
 
 set -euo pipefail
 
@@ -42,8 +45,9 @@ name=$2
 out_dir=$3
 demo_dir=${4:-}
 
-# The demo of each toolkit that shows the widgets of a window.
-demo=builder
+# The demos of each toolkit. `builder` shows the widgets of a window.
+# `headerbar` shows a window with client side decorations.
+demos=(builder headerbar)
 
 # The size of the window of a widget factory. The two windows take the same
 # size, thus the two pictures compare.
@@ -152,6 +156,8 @@ cat >"$XDG_CONFIG_HOME/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml" <<XML
     <property name="theme" type="string" value="$name"/>
     <property name="title_font" type="string" value="MS Sans Serif Bold 8"/>
     <property name="use_compositing" type="bool" value="false"/>
+    <property name="show_frame_shadow" type="bool" value="false"/>
+    <property name="show_popup_shadow" type="bool" value="false"/>
     <property name="workspace_count" type="int" value="1"/>
     <property name="click_to_focus" type="bool" value="true"/>
     <property name="focus_new" type="bool" value="true"/>
@@ -254,10 +260,22 @@ wm_is_up() {
   xprop -root -notype _NET_SUPPORTING_WM_CHECK 2>/dev/null | grep -q '0x'
 }
 
+# Start Xfwm4. With the argument `on`, Xfwm4 is a compositing manager. GTK then
+# draws client side decorations with the `csd` style, as on Wayland, and not
+# with the `solid-csd` style.
 start_wm() {
-  xfwm4 --compositor=off --sm-client-disable >"$work/xfwm4.log" 2>&1 &
+  local compositor=${1:-off} enabled=false
+  if [ "$compositor" = on ]; then
+    enabled=true
+  fi
+  # Xfwm4 reads this setting after the command line, thus both say the same.
+  xfconf-query -c xfwm4 -p /general/use_compositing -s "$enabled"
+  xfwm4 --compositor="$compositor" --sm-client-disable >"$work/xfwm4.log" 2>&1 &
   wm_pid=$!
   wait_for wm_is_up
+  if [ "$compositor" = on ]; then
+    sleep 1 # the compositor starts after the window manager
+  fi
   # After the window manager, which paints the root window itself.
   xsetroot -solid '#3a6ea5' # the desktop color of Windows 98
 }
@@ -522,12 +540,20 @@ shot_opensnitch() {
 
 # The window of one demo. Both programs take `--run`.
 #
-#     shot_demo <program> <output file>
+#     shot_demo <program> <demo> <output file>
+#
+# The window of `headerbar` has client side decorations. Its screenshot comes
+# from a compositing manager. The screenshot holds the frame that the theme
+# draws around the window.
 shot_demo() {
-  local program=$1 file=$2 id
+  local program=$1 demo=$2 file=$3 id compositor=off
+
+  if [ "$demo" = headerbar ]; then
+    compositor=on
+  fi
 
   start_x 1000x760
-  start_wm
+  start_wm "$compositor"
 
   "$program" --run="$demo" >"$work/$program-$demo.log" 2>&1 &
   app_pid=$!
@@ -538,6 +564,12 @@ shot_demo() {
   xdotool windowmove "$id" 0 0
   sleep 1
   magick import -window "$id" -screen "$file"
+  if [ "$compositor" = on ]; then
+    # GTK4 puts a transparent border around the frame, for the resize. The
+    # screenshot shows it black. Remove the black rows and columns only. The
+    # frame of the demo scheme has no black line.
+    magick "$file" -bordercolor black -border 1 -trim +repage "$file"
+  fi
   stop_x
 }
 
@@ -570,9 +602,11 @@ QT_QPA_PLATFORMTHEME=gtk2 QT_STYLE_OVERRIDE=gtk2 \
 
 if [ -n "$demo_dir" ]; then
   mkdir -p "$demo_dir"
-  shot_demo gtk3-demo "$demo_dir/$demo-gtk3.png"
-  shot_demo gtk4-demo "$demo_dir/$demo-gtk4.png"
-  files+=("$demo_dir/$demo-gtk3.png" "$demo_dir/$demo-gtk4.png")
+  for demo in "${demos[@]}"; do
+    shot_demo gtk3-demo "$demo" "$demo_dir/$demo-gtk3.png"
+    shot_demo gtk4-demo "$demo" "$demo_dir/$demo-gtk4.png"
+    files+=("$demo_dir/$demo-gtk3.png" "$demo_dir/$demo-gtk4.png")
+  done
 fi
 
 # The screenshots come from a screen with an alpha channel and an offset that
