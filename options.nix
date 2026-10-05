@@ -133,46 +133,71 @@ let
 
   package = packages.${cfg.variant};
 
-  # Keys that GTK3 and GTK4 both read.
-  commonSettings = {
-    gtk-theme-name = scheme.name;
-    gtk-icon-theme-name = scheme.iconTheme;
-    gtk-cursor-theme-name = cfg.cursorTheme.name;
-    # 0 lets the cursor theme select the size.
-    gtk-cursor-theme-size = 0;
-    gtk-font-name = "${fontName} ${toString cfg.baseFontSize}";
-    gtk-decoration-layout = cfg.decorationLayout;
-    # A Windows 9x window has a title bar, not a header bar with widgets in it.
-    gtk-dialogs-use-header = 0;
-    gtk-application-prefer-dark-theme = if scheme.dark then 1 else 0;
-    gtk-xft-antialias = if cfg.fontRendering.antialias then 1 else 0;
-    gtk-xft-hinting = if cfg.fontRendering.hinting then 1 else 0;
-    gtk-xft-hintstyle = cfg.fontRendering.hintstyle;
-    gtk-xft-rgba = cfg.fontRendering.rgba;
-  }
-  // lib.optionalAttrs (cfg.fontRendering.dpi != null) {
-    # GTK counts this one in 1024ths of a point.
-    gtk-xft-dpi = cfg.fontRendering.dpi * 1024;
-  };
+  # Keys that GTK3 and GTK4 both read, for a scheme with `name`, `iconTheme`
+  # and `dark`.
+  commonSettingsFor =
+    scheme:
+    {
+      gtk-theme-name = scheme.name;
+      gtk-icon-theme-name = scheme.iconTheme;
+      gtk-cursor-theme-name = cfg.cursorTheme.name;
+      # 0 lets the cursor theme select the size.
+      gtk-cursor-theme-size = 0;
+      gtk-font-name = "${fontName} ${toString cfg.baseFontSize}";
+      gtk-decoration-layout = cfg.decorationLayout;
+      # A Windows 9x window has a title bar, not a header bar with widgets in it.
+      gtk-dialogs-use-header = 0;
+      gtk-application-prefer-dark-theme = if scheme.dark then 1 else 0;
+      gtk-xft-antialias = if cfg.fontRendering.antialias then 1 else 0;
+      gtk-xft-hinting = if cfg.fontRendering.hinting then 1 else 0;
+      gtk-xft-hintstyle = cfg.fontRendering.hintstyle;
+      gtk-xft-rgba = cfg.fontRendering.rgba;
+    }
+    // lib.optionalAttrs (cfg.fontRendering.dpi != null) {
+      # GTK counts this one in 1024ths of a point.
+      gtk-xft-dpi = cfg.fontRendering.dpi * 1024;
+    };
 
   # The theme draws a flat 3D border around a widget. A round corner or a
   # shadow below a menu breaks that border, so GTK must not add one.
-  gtk3Settings = commonSettings // {
-    gtk-toolbar-style = "GTK_TOOLBAR_BOTH_HORIZ";
-    gtk-toolbar-icon-size = "GTK_ICON_SIZE_LARGE_TOOLBAR";
-    gtk-button-images = 0;
-    gtk-menu-images = 1;
-    gtk-enable-event-sounds = 0;
-    gtk-enable-input-feedback-sounds = 1;
-  };
+  gtk3SettingsFor =
+    scheme:
+    commonSettingsFor scheme
+    // {
+      gtk-toolbar-style = "GTK_TOOLBAR_BOTH_HORIZ";
+      gtk-toolbar-icon-size = "GTK_ICON_SIZE_LARGE_TOOLBAR";
+      gtk-button-images = 0;
+      gtk-menu-images = 1;
+      gtk-enable-event-sounds = 0;
+      gtk-enable-input-feedback-sounds = 1;
+    };
 
   # GTK4 measures a font of its own unless `gtk-font-rendering` is manual. The
   # theme draws a 1px border, so a fractional font metric moves a widget by
   # half a pixel and the border becomes gray.
-  gtk4Settings = commonSettings // {
-    gtk-font-rendering = "manual";
-    gtk-hint-font-metrics = 1;
-  };
+  gtk4SettingsFor =
+    scheme:
+    commonSettingsFor scheme
+    // {
+      gtk-font-rendering = "manual";
+      gtk-hint-font-metrics = 1;
+    };
+
+  # The settings files of GTK3 and GTK4 for a scheme. A scheme that is not in
+  # `schemes` (for example the scheme of a sandbox) uses it too.
+  settingsFor =
+    {
+      name,
+      iconTheme ? name,
+      dark ? false,
+    }:
+    let
+      scheme = { inherit name iconTheme dark; };
+    in
+    {
+      gtk3 = gtk3SettingsFor scheme // cfg.gtk3Settings;
+      gtk4 = gtk4SettingsFor scheme // cfg.gtk4Settings;
+    };
 
   # A GTK4 program that draws its own title bar gets a header bar, not the
   # title bar of the window manager. These rules give that header bar the size
@@ -471,11 +496,19 @@ in
       type = lib.types.attrs;
       internal = true;
       readOnly = true;
-      default = {
-        gtk3 = gtk3Settings // cfg.gtk3Settings;
-        gtk4 = gtk4Settings // cfg.gtk4Settings;
-      };
+      default = settingsFor { inherit (scheme) name iconTheme dark; };
       description = "The settings that GTK3 and GTK4 read.";
+    };
+
+    settingsFor = lib.mkOption {
+      type = lib.types.functionTo lib.types.attrs;
+      internal = true;
+      readOnly = true;
+      default = settingsFor;
+      description = ''
+        A function that gives the GTK3 and GTK4 settings of one scheme, as
+        `settings`. It takes `name`, `iconTheme` (default: `name`) and `dark`.
+      '';
     };
 
     css = lib.mkOption {
