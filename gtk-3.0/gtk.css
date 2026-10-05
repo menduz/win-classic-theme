@@ -24,6 +24,8 @@
 @define-color wm_active_title_text @activetitletext@;
 @define-color wm_inactive_title @inactivetitle@;
 @define-color wm_inactive_title_text @inactivetitletext@;
+@define-color chromium_base_color @chromiumbase@;
+@define-color chromium_frame_color @chromiumframe@;
 /* begin */
 
 /* Import widgets */
@@ -48,6 +50,7 @@
 @import url("gtk-xfce4.css");
 @import url("gtk-pushbuttons.css");
 @import url("gtk-hacks.css");
+@import url("gtk-chromium.css");
 
 /**************************************************************/
 @define-color disabled_bg_color mix(@fg_color, @bg_color, 0.95);

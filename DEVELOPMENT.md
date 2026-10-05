@@ -270,6 +270,10 @@ and stop the calculation. Each preset does this:
 | `shadow`     | ControlDark       | dark edge     |
 | `disabledfg` | GrayText          | disabled text |
 
+The build also calculates `chromiumbase`, the address bar of Chromium, and
+`chromiumframe`, its tab strip. Refer
+to [Chromium and Brave](#chromium-and-brave).
+
 ### titlebarButtons
 
 An attribute set with two boolean values. Both are `true` by default.
@@ -414,6 +418,54 @@ share/plasma/desktoptheme/<name>/
 share/icons/<name>/
                 the icon theme, the action icons of SE98kde
 ```
+
+## Chromium and Brave
+
+Chromium reads its colors from the theme when its appearance setting is "GTK".
+It reads no palette. For each color it makes a chain of CSS nodes, draws the
+background, the text or the border of the chain and takes the average of the
+pixels. It adds the class `chromium` to each node, thus a rule with this class
+applies only to Chromium. `gtk-3.0/gtk-chromium.css` holds these rules.
+
+`chromium-colors` in the development shell does the same steps and prints each
+color with its node. Use it after a change to the style sheets:
+
+```bash
+preview-theme dark chromium-colors
+```
+
+| Part of the browser      | Node                            | Color of the scheme    |
+| ------------------------ | ------------------------------- | ---------------------- |
+| tab strip                | `menubar`, `menubar:backdrop`   | `chromiumframe`        |
+| inactive tab text        | `menubar label.title`           | `fgcolor`              |
+| toolbar and active tab   | `window.background`             | `bgcolor`              |
+| toolbar text and icons   | `label`                         | `fgcolor`              |
+| address bar              | `textview.view`                 | `chromiumbase`         |
+| address bar text         | `textview.view text`            | `basefg`               |
+| menus                    | `menu`, `menuitem:hover`        | `bgcolor`, `selectedbg` |
+| disabled text            | `label:disabled`                | `disabledfg`           |
+
+The table is for "Use system title bar and borders". Without that setting,
+Chromium draws its own frame from `decoration` and `headerbar.titlebar`, as a
+GTK window with client side decorations. The `menubar` of a GTK program
+keeps `bgcolor`.
+
+Chromium draws the address bar with no 3D edge. A dark text box on a dark
+window then looks the same as the active tab. Thus `chromiumbase` is
+`basecolor` at 40 percent when `basecolor` is darker than `bgcolor`, and
+`basecolor` in all other schemes. Give `chromiumbase` in `colors` to set a
+different color.
+
+Brave paints the top corners of the toolbar in the header color of its own
+palette, `kColorSysHeader`, also in the "GTK" appearance. No style sheet can
+change that color. Thus `chromiumframe` is that color, and the tab strip and
+the corners are the same: `#1f1f23` when `basecolor` is darker than
+`bgcolor`, else `#e4e4e5`. These two values are correct only when Brave has
+no theme color. A theme color in brave://settings/appearance changes the
+corners and not the tab strip.
+
+Brave also takes its focus ring and its toggle buttons from its own theme
+color, not from GTK.
 
 ## Notes
 

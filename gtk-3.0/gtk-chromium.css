@@ -1,0 +1,23 @@
+/* Chromium adds the class "chromium" to each node that it reads. */
+
+textview.view.chromium {
+  background-color: @chromium_base_color;
+}
+
+label.chromium:disabled {
+  color: @disabled_fg_color;
+}
+
+/* With the title bar of the system, Chromium paints the tab strip in the
+   color of the menu bar. Brave paints the corners of the toolbar in one color
+   for the active and the inactive window, so the tab strip does the same. */
+menubar.chromium,
+menubar.chromium:backdrop {
+  background-color: @chromium_frame_color;
+  background-image: none;
+}
+
+menubar.chromium label.title,
+menubar.chromium:backdrop label.title {
+  color: @fg_color;
+}

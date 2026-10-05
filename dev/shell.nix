@@ -2,7 +2,9 @@
 # look at it and take the screenshots.
 {
   mkShell,
+  runCommandCC,
   writeShellApplication,
+  pkg-config,
   imagemagick,
   nixfmt-rfc-style,
   gtk3,
@@ -42,6 +44,21 @@ let
       fi
     '';
   };
+
+  # Print the colors that Chromium and Brave read from a scheme, for example
+  # `preview-theme dark chromium-colors`.
+  chromium-colors =
+    runCommandCC "win-classic-chromium-colors"
+      {
+        nativeBuildInputs = [ pkg-config ];
+        buildInputs = [ gtk3 ];
+        meta.mainProgram = "chromium-colors";
+      }
+      ''
+        mkdir -p "$out/bin"
+        $CC -O2 -Wall -o "$out/bin/chromium-colors" ${./chromium-colors.c} \
+          $(pkg-config --cflags --libs gtk+-3.0)
+      '';
 in
 mkShell {
   packages = [
@@ -49,6 +66,7 @@ mkShell {
     nixfmt-rfc-style
     gtk3.dev # gtk3-widget-factory, gtk3-demo, gtk-builder-tool
     gtk4.dev
+    chromium-colors
     preview
     screenshot
     showcase
@@ -63,6 +81,7 @@ mkShell {
       nix build .#screenshots   make the screenshots in the sandbox
       update-screenshots        make them and copy them to screenshots/
       preview-theme <preset>    open the showcase window with a scheme
+      chromium-colors           the colors that Chromium reads from GTK_THEME
       win-classic-screenshot    the screenshot script, on a built theme
       nix fmt                   format the Nix files
 

@@ -150,6 +150,19 @@ let
   # on a light window and on a dark one.
   disabledfg =
     cfg.disabledfg or (toColor (lib.zipListsWith (a: b: (a + b) / 2) (toRgb cfg.fgcolor) bgRgb));
+  # Chromium draws its address bar with no 3D edge. A dark text box on a dark
+  # window then looks the same as the tabs, so the address bar of a dark
+  # scheme gets a darker box.
+  sum = lib.foldl' builtins.add 0;
+  darkBase = sum (toRgb cfg.basecolor) < sum bgRgb;
+  chromiumbase =
+    cfg.chromiumbase
+      or (if darkBase then toColor (map (ch: trunc (ch * 0.4)) (toRgb cfg.basecolor)) else cfg.basecolor);
+  # Brave paints the corners of its toolbar in the header color of its own
+  # palette, and no theme can change that color. The tab strip gets the same
+  # color, so that the corners do not show. These are the colors of Brave with
+  # no theme color, in the dark mode and in the light mode.
+  chromiumframe = cfg.chromiumframe or (if darkBase then "#1f1f23" else "#e4e4e5");
 
   buttons = {
     minimize = true;
@@ -186,7 +199,13 @@ let
       tooltipfg
       buttonscolor
       ;
-    inherit highlight shadow disabledfg;
+    inherit
+      highlight
+      shadow
+      disabledfg
+      chromiumbase
+      chromiumframe
+      ;
     themename = name;
     decorationlayout = decorationLayout;
     xfwmbuttons = xfwmButtons;
