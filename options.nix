@@ -94,15 +94,37 @@ let
     lib.types.str
   ];
 
+  # kwm tells a tiled window that fills the screen that it is maximized
+  # (smart_gaps). Such a window shows no default title bar. GTK gives this
+  # title bar to a program without a header bar of its own, for example
+  # Thunar. It holds only the title and the close button.
+  #
+  # GTK3 CSS has no "display: none". The negative top margin makes the height
+  # of the title bar 0, and GTK draws the bar above the window, where it is
+  # not seen. A maximized window has no frame, thus the bar covers no frame.
+  kwmGtk3Css = ''
+    window.maximized > headerbar.titlebar.default-decoration {
+      margin-top: -200px;
+    }
+  '';
+
+  # Build one scheme with the settings of this configuration. A scheme that is
+  # not in `schemes` (for example the scheme of a sandbox) uses it too.
+  mkPackage =
+    {
+      name,
+      preset ? null,
+      colors ? { },
+    }:
+    pkgs.callPackage ./default.nix {
+      inherit name preset colors;
+      inherit (cfg) titlebarButtons;
+      extraGtk3Css = lib.optionalString cfg.kwm.enable kwmGtk3Css;
+    };
+
   # Build every scheme. A session can change to another one at run time, so
   # all of the schemes must be in the profile. GTK finds none of them otherwise.
-  packages = lib.mapAttrs (
-    _: scheme:
-    pkgs.callPackage ./default.nix {
-      inherit (scheme) name preset colors;
-      inherit (cfg) titlebarButtons;
-    }
-  ) cfg.schemes;
+  packages = lib.mapAttrs (_: scheme: mkPackage { inherit (scheme) name preset colors; }) cfg.schemes;
 
   scheme =
     cfg.schemes.${cfg.variant} or (throw ''
@@ -218,6 +240,11 @@ in
         a session can change between them at run time.
       '';
     };
+
+    kwm.enable = lib.mkEnableOption ''
+      the integration with the kwm window manager. kwm tells a tiled window
+      that fills the screen that it is maximized, and draws no frame for it.
+      Each scheme then hides the default GTK3 title bar of a maximized window'';
 
     variant = lib.mkOption {
       type = lib.types.str;
@@ -398,6 +425,18 @@ in
     };
 
     # Values that the two modules read. A configuration does not set these.
+    mkPackage = lib.mkOption {
+      type = lib.types.functionTo lib.types.package;
+      internal = true;
+      readOnly = true;
+      default = mkPackage;
+      description = ''
+        A function that builds one scheme with the settings of this
+        configuration. It takes `name`, `preset` and `colors`, as a scheme of
+        `schemes`.
+      '';
+    };
+
     packages = lib.mkOption {
       type = lib.types.attrsOf lib.types.package;
       internal = true;

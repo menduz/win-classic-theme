@@ -13,6 +13,9 @@
     minimize = true;
     maximize = true;
   },
+
+  # Style sheet rules that go at the end of the GTK3 style sheet of the theme.
+  extraGtk3Css ? "",
 }:
 let
   presets = import ./presets.nix;
@@ -470,6 +473,11 @@ stdenv.mkDerivation {
     theme=$out/share/themes/${name}
     mkdir -p "$theme"/wine
     cp -r gtk-2.0 gtk-3.0 gtk-4.0 xfwm4 rofi index.theme LICENSE "$theme"/
+    ${
+      lib.optionalString (extraGtk3Css != "") ''
+        cat ${builtins.toFile "extra-gtk3.css" extraGtk3Css} >>"$theme"/gtk-3.0/gtk.css
+      ''
+    }
     cp ${builtins.toFile "theme.reg" wineReg} "$theme"/wine/${name}.reg
 
     # The icon theme of the scheme has the name of the scheme. It inherits SE98.
