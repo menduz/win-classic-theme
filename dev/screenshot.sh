@@ -116,10 +116,14 @@ mkdir -p "$HOME/.themes" "$XDG_CONFIG_HOME/gtk-3.0" "$XDG_CONFIG_HOME/gtk-4.0" \
   "$XDG_CONFIG_HOME/xfce4/xfconf/xfce-perchannel-xml" "$XDG_CACHE_HOME"
 ln -sfn "$theme_dir" "$HOME/.themes/$name"
 
+# The package of the theme holds the icon theme of the scheme, with the name of
+# the scheme. It inherits SE98, which XDG_DATA_DIRS already holds.
+export XDG_DATA_DIRS="$(dirname "$(dirname "$theme_dir")"):$XDG_DATA_DIRS"
+
 cat >"$XDG_CONFIG_HOME/gtk-3.0/settings.ini" <<INI
 [Settings]
 gtk-theme-name=$name
-gtk-icon-theme-name=SE98
+gtk-icon-theme-name=$name
 gtk-font-name=MS Sans Serif 8
 gtk-enable-animations=false
 gtk-cursor-blink=false
@@ -136,7 +140,7 @@ CSS
 
 cat >"$XDG_CONFIG_HOME/gtk-4.0/settings.ini" <<INI
 [Settings]
-gtk-icon-theme-name=SE98
+gtk-icon-theme-name=$name
 gtk-font-name=MS Sans Serif 8
 gtk-enable-animations=false
 gtk-cursor-blink=false
@@ -174,7 +178,7 @@ include "$theme_dir/gtk-2.0/gtkrc"
 gtk-font-name = "MS Sans Serif 8"
 # The Qt style of GTK2 takes the icons of the program from this key. Without
 # it a Qt window shows an empty button in place of each icon.
-gtk-icon-theme-name = "SE98"
+gtk-icon-theme-name = "$name"
 RC
 
 export GTK_THEME=$name
@@ -366,7 +370,7 @@ LookAndFeelPackage=win-classic
 font=MS Sans Serif,8,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
 
 [Icons]
-Theme=SE98
+Theme=$name
 
 [WM]
 activeFont=MS Sans Serif,8,-1,5,700,0,0,0,0,0,0,0,0,0,0,1

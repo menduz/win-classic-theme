@@ -34,7 +34,7 @@ let
   fontName = lib.head sansSerif;
 
   schemeType = lib.types.submodule (
-    { name, ... }:
+    { name, config, ... }:
     {
       options = {
         name = lib.mkOption {
@@ -73,6 +73,17 @@ let
             value.
           '';
         };
+
+        iconTheme = lib.mkOption {
+          type = lib.types.str;
+          default = if cfg.iconTheme.name != null then cfg.iconTheme.name else config.name;
+          defaultText = lib.literalMD "`iconTheme.name`, or `name` when that is null";
+          description = ''
+            The icon theme of the scheme. The package of the scheme holds an
+            icon theme with the name of the scheme: the action icons of SE98kde
+            in the colors of the scheme. It inherits SE98.
+          '';
+        };
       };
     }
   );
@@ -103,7 +114,7 @@ let
   # Keys that GTK3 and GTK4 both read.
   commonSettings = {
     gtk-theme-name = scheme.name;
-    gtk-icon-theme-name = cfg.iconTheme.name;
+    gtk-icon-theme-name = scheme.iconTheme;
     gtk-cursor-theme-name = cfg.cursorTheme.name;
     # 0 lets the cursor theme select the size.
     gtk-cursor-theme-size = 0;
@@ -259,9 +270,13 @@ in
 
     iconTheme = {
       name = lib.mkOption {
-        type = lib.types.str;
-        default = "SE98";
-        description = "The name of the icon theme.";
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        example = "SE98";
+        description = ''
+          The name of the icon theme of every scheme. With null, each scheme
+          uses the icon theme of its package, which inherits SE98.
+        '';
       };
       package = lib.mkOption {
         type = lib.types.nullOr lib.types.package;
@@ -396,7 +411,7 @@ in
       internal = true;
       readOnly = true;
       default = {
-        inherit (scheme) name dark;
+        inherit (scheme) name dark iconTheme;
         inherit package;
       };
       description = "The scheme that `variant` selects.";

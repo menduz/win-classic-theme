@@ -206,14 +206,19 @@ programs.win-classic-theme = {
 };
 ```
 
-A scheme takes four keys:
+A scheme takes five keys:
 
-| Key      | Meaning                                                                    |
-| -------- | -------------------------------------------------------------------------- |
-| `preset` | the name of a scheme in `presets.nix`                                       |
-| `colors` | single colors, which win over the same color of `preset`                    |
-| `dark`   | whether the scheme is a dark one                                            |
-| `name`   | the name below `share/themes`, `win-classic-` and the name of the scheme    |
+| Key         | Meaning                                                                    |
+| ----------- | -------------------------------------------------------------------------- |
+| `preset`    | the name of a scheme in `presets.nix`                                       |
+| `colors`    | single colors, which win over the same color of `preset`                    |
+| `dark`      | whether the scheme is a dark one                                            |
+| `name`      | the name below `share/themes`, `win-classic-` and the name of the scheme    |
+| `iconTheme` | the icon theme, `name` when `iconTheme.name` is null                        |
+
+The package of a scheme also holds an icon theme below `share/icons/<name>`:
+the action icons of SE98kde in the colors of the scheme. The icons of the window
+buttons come from SE98. The theme inherits SE98, and SE98 inherits Chicago95.
 
 The two schemes above build `win-classic-dark` and `win-classic-light`. A
 scheme can also start from a preset and change single colors:
@@ -232,18 +237,20 @@ midnight = {
 ### The scheme of a running session
 
 `variant` gives the scheme of a new session. A running session takes another
-scheme from three values, and none of them needs a rebuild:
+scheme from four values, and none of them needs a rebuild:
 
 | Value                                          | Who reads it                        |
 | ---------------------------------------------- | ----------------------------------- |
 | `org.gnome.desktop.interface gtk-theme`         | GTK, through the settings portal    |
+| `org.gnome.desktop.interface icon-theme`        | GTK, through the settings portal    |
 | `org.gnome.desktop.interface color-scheme`      | a program that follows dark or light |
 | `GTK_THEME`                                     | a program that libadwaita draws     |
 
-A script that changes to `win-classic-light` sets the three:
+A script that changes to `win-classic-light` sets the four:
 
 ```sh
 gsettings set org.gnome.desktop.interface gtk-theme win-classic-light
+gsettings set org.gnome.desktop.interface icon-theme win-classic-light
 gsettings set org.gnome.desktop.interface color-scheme prefer-light
 
 # A program that systemd or a portal starts reads this environment. Export the
@@ -272,7 +279,7 @@ in the store. A new window takes the new scheme; an open one needs a restart.
 | `decorationLayout`          | that of the theme  | `gtk-decoration-layout`, the buttons that GTK draws |
 | `windowManagerButtonLayout` | that of the theme  | the buttons that the window manager draws           |
 | `baseFontSize`              | `8`                | the size of the interface font, in points           |
-| `iconTheme`                 | SE98               | the icon theme, with Chicago95 for missing icons    |
+| `iconTheme`                 | that of the scheme | the icon theme, it inherits SE98 and Chicago95      |
 | `cursorTheme`               | Adwaita 16         | the cursor theme                                    |
 | `fontRendering`             | 96 dpi, hintslight | antialias, hinting, subpixel order and dpi          |
 | `gtk3Settings`              | `{ }`              | keys to add to the GTK3 settings, or to replace     |
@@ -362,3 +369,8 @@ Sliver X.
 [Creative Commons Attribution Share Alike 3.0](http://creativecommons.org/licenses/by-sa/3.0/)
 license. Each directory keeps the license and the readme of the author beside
 the font file, as that license asks.
+
+`icons/SE98kde/` holds the action icons of
+[SE98KDE](https://github.com/Dejweed/SE98KDE) by Dejweed, commit `929a9a1`,
+under the GPL 2. The directory keeps the license and the readme of the author.
+The build writes the colors of the scheme in the icons.

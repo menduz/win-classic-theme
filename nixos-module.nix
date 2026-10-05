@@ -22,7 +22,7 @@ let
   # menu item from the icon theme in it.
   gtk2Rc = ''
     gtk-theme-name = "${cfg.theme.name}"
-    gtk-icon-theme-name = "${cfg.iconTheme.name}"
+    gtk-icon-theme-name = "${cfg.theme.iconTheme}"
     gtk-cursor-theme-name = "${cfg.cursorTheme.name}"
     gtk-cursor-theme-size = ${toString cfg.cursorTheme.size}
     gtk-font-name = "${cfg.fontName} ${toString cfg.baseFontSize}"
@@ -86,7 +86,7 @@ in
     programs.dconf = {
       enable = true;
       profiles.user.databases = [
-        { settings."org/gnome/desktop/interface".icon-theme = cfg.iconTheme.name; }
+        { settings."org/gnome/desktop/interface".icon-theme = cfg.theme.iconTheme; }
       ];
     };
   };

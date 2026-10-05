@@ -88,6 +88,26 @@ takes a part that the style does not hold from its default style.
 Do not change a color in a style sheet by hand. The build ignores your change
 on the next build of a different scheme. Add a token in its place.
 
+The SVG icons of `icons/SE98kde/` hold no token. Each icon holds a style sheet
+with the id `current-color-scheme`, and its paths take `currentColor` from the
+classes of that style sheet. KDE replaces the style sheet at run time. GTK and
+Qt draw it as it is, thus the build writes the colors of the scheme in it:
+
+| Class                                                       | Color        |
+| ----------------------------------------------------------- | ------------ |
+| `ColorScheme-Text`                                          | `fgcolor`    |
+| `ColorScheme-Highlight`                                     | `selectedbg` |
+| `ColorScheme-NegativeText`, `-NeutralText`, `-PositiveText` | `fgcolor`    |
+
+These are the colors that `plasma.nix` gives to KDE. GTK draws an icon whose
+name ends in `-symbolic` in the color of the text of its widget, and it ignores
+the style sheet. The build stops if an icon keeps a color that is not in the
+scheme. The icons stay as their author made them: do not change them by hand.
+
+The build removes the icons of the window buttons, `window-*`. SE98 draws them
+at more sizes and with smaller glyphs, and GTK selects a size only in the first
+theme that holds the icon.
+
 ## The interface font
 
 `fonts/` holds the two files of the FontStruction "MS Sans Serif" by "lou",
@@ -391,6 +411,8 @@ share/aurorae/themes/<name>/
                 the KWin decoration
 share/plasma/desktoptheme/<name>/
                 the Plasma style
+share/icons/<name>/
+                the icon theme, the action icons of SE98kde
 ```
 
 ## Notes

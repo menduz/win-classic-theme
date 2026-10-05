@@ -432,6 +432,16 @@ stdenv.mkDerivation {
     cd ../..
     rm -rf images
 
+    # Each SVG icon of SE98kde holds the Breeze colors in a style sheet. KDE
+    # replaces that style sheet at run time, GTK and Qt draw it as it is. Thus
+    # the colors of the scheme go into it, the same colors that plasma.nix
+    # gives to KDE. A symbolic icon gets the color of the text from GTK.
+    find icons/SE98kde -name '*.svg' -type f -exec sed -z -E -i \
+      -e 's/(\.ColorScheme-Highlight[[:space:]]*\{[[:space:]]*color:[[:space:]]*)#[0-9a-fA-F]{6}/\1${cfg.selectedbg}/g' \
+      -e 's/(\.ColorScheme-[A-Za-z]*Text[[:space:]]*\{[[:space:]]*color:[[:space:]]*)#[0-9a-fA-F]{6}/\1${cfg.fgcolor}/g' \
+      {} +
+    sed -i 's/^Name=.*/Name=${name}/' icons/SE98kde/index.theme
+
     runHook postBuild
   '';
 
@@ -442,6 +452,17 @@ stdenv.mkDerivation {
     mkdir -p "$theme"/wine
     cp -r gtk-2.0 gtk-3.0 gtk-4.0 xfwm4 rofi index.theme LICENSE "$theme"/
     cp ${builtins.toFile "theme.reg" wineReg} "$theme"/wine/${name}.reg
+
+    # The icon theme of the scheme has the name of the scheme. It inherits SE98.
+    mkdir -p $out/share/icons/${name}
+    # The copy follows the links, because some links point to an icon that the
+    # next step removes.
+    cp -rL icons/SE98kde/actions icons/SE98kde/index.theme $out/share/icons/${name}/
+
+    # SE98 gives the icons of the window buttons. It draws them at more sizes,
+    # and with smaller glyphs. GTK selects a size only in the first theme that
+    # holds the icon, thus these icons must not be in this theme.
+    find $out/share/icons/${name}/actions -name 'window-*.svg' -delete
 
     ${installFiles "$out/share/aurorae/themes/${name}" aurorae}
     ${installFiles "$out/share/plasma/desktoptheme/${name}" plasma}
@@ -479,6 +500,19 @@ stdenv.mkDerivation {
         bad=1
       fi
     done
+
+    # Each color of the style sheet of an icon must be a color of the scheme.
+    while read -r color; do
+      case "$color" in
+        '${cfg.fgcolor}' | '${cfg.selectedbg}') ;;
+        *)
+          echo "an icon holds the color $color, and the scheme does not" >&2
+          bad=1
+          ;;
+      esac
+    done < <(find $out/share/icons/${name} -name '*.svg' -exec cat {} + |
+      grep -ozE '\.ColorScheme-[A-Za-z]+[[:space:]]*\{[[:space:]]*color:[[:space:]]*#[0-9a-fA-F]{6}' |
+      tr '\0' '\n' | grep -oE '#[0-9a-fA-F]{6}$' | sort -u)
 
     if [ "$bad" -ne 0 ]; then
       exit 1

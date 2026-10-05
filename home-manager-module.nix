@@ -14,8 +14,10 @@ let
     inherit (cfg.theme) name package;
   };
 
+  # The icon theme of the scheme inherits the theme of `iconTheme.package`.
   iconThemeAttrs = {
-    inherit (cfg.iconTheme) name package;
+    name = cfg.theme.iconTheme;
+    inherit (cfg.iconTheme) package;
   };
 in
 {

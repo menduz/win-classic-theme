@@ -42,7 +42,7 @@
   demoTheme ? "win-classic-standard",
 }:
 let
-  # The icon theme of the modules. It inherits Chicago95.
+  # The icon theme of each scheme inherits SE98, and SE98 inherits Chicago95.
   se98 = callPackage ../win98se.nix { };
 
   # The window with one widget of each kind. The screenshot script starts it.
@@ -205,7 +205,8 @@ let
       export XDG_DATA_DIRS=${
         lib.concatStringsSep ":" [
           "${xfconf}/share"
-          # The icon theme of the modules and the theme that it inherits.
+          # SE98 and the theme that it inherits. The script puts the package of
+          # the theme, with the icon theme of the scheme, in front of them.
           # Adwaita stays behind them, as in the profile of a user: the modules
           # take the cursor from that package, and a toolkit reads it for an
           # icon that neither theme holds.
