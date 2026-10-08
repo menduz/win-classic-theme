@@ -1,5 +1,11 @@
 active_color_1=@activetitle@
 inactive_color_1=@inactivetitle@
+active_color_2=@bgcolor@
+inactive_color_2=@bgcolor@
+active_hilight_2=@highlight@
+inactive_hilight_2=@highlight@
+active_shadow_2=@shadow@
+inactive_shadow_2=@shadow@
 active_border_color=@border@
 active_text_color=@activetitletext@
 inactive_text_color=@inactivetitletext@
@@ -15,4 +21,8 @@ title_horizontal_offset=2
 title_vertical_offset_active=1
 title_vertical_offset_inactive=1
 borderless_maximize=0
-
+# Not read by xfwm4: the right end of the caption gradient and the glyph of
+# the buttons, for window managers that draw the title bar (kwm).
+active_gradient_color=@activetitle1@
+inactive_gradient_color=@inactivetitle@
+buttons_color=@buttonscolor@
