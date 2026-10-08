@@ -1,7 +1,12 @@
 {
   lib,
   stdenv,
+  callPackage,
   imagemagick,
+
+  # The icon theme that the icon theme of the scheme inherits. The build reads
+  # its links.
+  se98 ? callPackage ./win98se.nix { },
 
   name ? "win-classic-theme",
 
@@ -478,11 +483,9 @@ stdenv.mkDerivation {
     theme=$out/share/themes/${name}
     mkdir -p "$theme"/wine
     cp -r gtk-2.0 gtk-3.0 gtk-4.0 xfwm4 rofi index.theme LICENSE "$theme"/
-    ${
-      lib.optionalString (extraGtk3Css != "") ''
-        cat ${builtins.toFile "extra-gtk3.css" extraGtk3Css} >>"$theme"/gtk-3.0/gtk.css
-      ''
-    }
+    ${lib.optionalString (extraGtk3Css != "") ''
+      cat ${builtins.toFile "extra-gtk3.css" extraGtk3Css} >>"$theme"/gtk-3.0/gtk.css
+    ''}
     cp ${builtins.toFile "theme.reg" wineReg} "$theme"/wine/${name}.reg
 
     # The icon theme of the scheme has the name of the scheme. It inherits SE98.
@@ -495,6 +498,70 @@ stdenv.mkDerivation {
     # and with smaller glyphs. GTK selects a size only in the first theme that
     # holds the icon, thus these icons must not be in this theme.
     find $out/share/icons/${name}/actions -name 'window-*.svg' -delete
+
+    # SE98 gives some names as links to another icon, for example
+    # gtk-media-pause links to media-playback-pause. GTK finds the name in SE98
+    # and takes the icon of SE98, not the icon of this theme. Thus each link of
+    # SE98 to an icon of this theme gets the same link here. A name stays out
+    # when SE98 also holds it as a file, or when its links in SE98 point to
+    # different icons. A link from a symbolic name to a name that is not
+    # symbolic also stays out, because GTK paints the two kinds in different
+    # ways. The loop also follows a link to a link.
+    icons=$out/share/icons/${name}
+    find ${se98}/share/icons/SE98 \( -type f -o -type l \) -printf '%y\t%f\t%l\n' |
+      awk -F '\t' '
+        $2 ~ /\.symbolic\.png$/ || $2 !~ /\.(png|svg|xpm)$/ { next }
+        {
+          alias = $2
+          sub(/\.(png|svg|xpm)$/, "", alias)
+          if ($1 == "f") { file[alias] = 1; next }
+          target = $3
+          sub(/.*\//, "", target)
+          sub(/\.(png|svg|xpm)$/, "", target)
+          if (!((alias, target) in seen)) {
+            seen[alias, target] = 1
+            count[alias]++
+            only[alias] = target
+          }
+        }
+        END {
+          for (alias in count) {
+            target = only[alias]
+            if (alias in file || count[alias] != 1 || alias ~ /^window-/) continue
+            if ((alias ~ /-symbolic$/) != (target ~ /-symbolic$/)) continue
+            print alias "\t" target
+          }
+        }' | sort >se98-links
+    while true; do
+      find "$icons" -mindepth 3 -printf '%f\n' | sed 's/\.[^.]*$//' | sort -u >names
+      awk -F '\t' 'NR == FNR { have[$1]; next } ($2 in have) && !($1 in have)' \
+        names se98-links >new-links
+      if [ ! -s new-links ]; then
+        break
+      fi
+      while IFS=$'\t' read -r alias target; do
+        for file in "$icons"/actions/*/"$target".*; do
+          [ -e "$file" ] || continue
+          dir=$(dirname "$file")
+          if [ -z "$(find "$dir" -maxdepth 1 -name "$alias.*" -print -quit)" ]; then
+            ln -s "$(basename "$file")" "$dir/$alias.''${file##*.}"
+          fi
+        done
+      done <new-links
+    done
+    rm se98-links names new-links
+
+    # SE98 links media-seek-backward-rtl and media-seek-forward-rtl to a
+    # different icon at each size. In a text from right to left, backward
+    # points to the right, as the icon of SE98 at 16 pixels shows.
+    for dir in "$icons"/actions/*; do
+      if [ -e "$dir/media-seek-forward.svg" ]; then
+        ln -s media-seek-forward.svg "$dir/media-seek-backward-rtl.svg"
+      fi
+      if [ -e "$dir/media-seek-backward.svg" ]; then
+        ln -s media-seek-backward.svg "$dir/media-seek-forward-rtl.svg"
+      fi
+    done
 
     ${installFiles "$out/share/aurorae/themes/${name}" aurorae}
     ${installFiles "$out/share/plasma/desktoptheme/${name}" plasma}
