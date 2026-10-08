@@ -5,7 +5,8 @@
 # theme on an X server that holds only Xfwm4 and one application.
 #
 # The result is a directory of PNG files. `update-screenshots` copies them to
-# `screenshots/` in the working tree.
+# `screenshots/` in the working tree, and it also updates the icon sheets of
+# `icon-sheets.nix`.
 {
   lib,
   callPackage,
@@ -36,6 +37,7 @@
   buildEnv,
   kdePackages,
   libfaketime,
+  update-icon-sheets,
   themes,
 
   # The scheme of the screenshots of the demos. AGENTS.md asks for this one.
@@ -258,6 +260,7 @@ in
   # and puts them in the working tree.
   update = writeShellApplication {
     name = "update-screenshots";
+    runtimeInputs = [ update-icon-sheets ];
     text = ''
       if [ ! -e ./default.nix ] || [ ! -e ./presets.nix ]; then
         echo "update-screenshots: run this in the directory of the theme" >&2
@@ -273,6 +276,7 @@ in
       install -m 644 "$out"/demos/*.png demos/
       echo "update-screenshots: wrote"
       ls -1 screenshots/ demos/
+      update-icon-sheets
     '';
   };
 }

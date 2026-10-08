@@ -33,30 +33,55 @@
         "windows-standard"
         "dark"
       ];
+
+      # One package for each preset.
+      themesFor =
+        pkgs:
+        lib.mapAttrs (
+          preset: _:
+          pkgs.callPackage ./default.nix {
+            inherit preset;
+            name = themeName preset;
+          }
+        ) presets;
+
+      # The icon sheets show the icons of the light scheme and of the dark
+      # scheme of the screenshots.
+      iconSheetsFor =
+        pkgs:
+        let
+          themes = themesFor pkgs;
+          scheme = preset: {
+            inherit preset;
+            package = themes.${preset};
+            name = themeName preset;
+          };
+        in
+        pkgs.callPackage ./dev/icon-sheets.nix {
+          light = scheme (lib.elemAt shown 0);
+          dark = scheme (lib.elemAt shown 1);
+        };
     in
     {
       # One package for each preset, plus the screenshots.
       packages = forEachSystem (
         pkgs:
         let
-          themes = lib.mapAttrs (
-            preset: _:
-            pkgs.callPackage ./default.nix {
-              inherit preset;
-              name = themeName preset;
-            }
-          ) presets;
+          themes = themesFor pkgs;
+          icons = iconSheetsFor pkgs;
 
           shots = pkgs.callPackage ./dev/screenshots.nix {
             themes = lib.listToAttrs (
               map (preset: lib.nameValuePair (themeName preset) themes.${preset}) shown
             );
+            update-icon-sheets = icons.update;
           };
         in
         themes
         // {
           default = themes.dark;
           inherit (shots) screenshots showcase;
+          icon-sheets = icons.sheets;
           # The interface font of Windows 9x. The modules install no font: they
           # read the family of `fonts.fontconfig.defaultFonts.sansSerif`, so a
           # configuration puts this package in `fonts.packages` and the name
@@ -71,13 +96,16 @@
       devShells = forEachSystem (
         pkgs:
         let
+          icons = iconSheetsFor pkgs;
           shots = pkgs.callPackage ./dev/screenshots.nix {
             themes = { }; # the shell makes the screenshots with `nix build`
+            update-icon-sheets = icons.update;
           };
         in
         {
           default = pkgs.callPackage ./dev/shell.nix {
             inherit (shots) screenshot showcase;
+            update-icon-sheets = icons.update;
             update-screenshots = shots.update;
           };
         }

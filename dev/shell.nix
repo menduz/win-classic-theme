@@ -12,6 +12,7 @@
   screenshot,
   showcase,
   update-screenshots,
+  update-icon-sheets,
 }:
 let
   # Build one preset and open the showcase window with it, on the display of
@@ -71,6 +72,7 @@ mkShell {
     screenshot
     showcase
     update-screenshots
+    update-icon-sheets
   ];
 
   shellHook = ''
@@ -80,6 +82,7 @@ mkShell {
       nix build .#<preset>      build one scheme, for example .#luna
       nix build .#screenshots   make the screenshots in the sandbox
       update-screenshots        make them and copy them to screenshots/
+      update-icon-sheets        draw all the icons of SE98 in screenshots/
       preview-theme <preset>    open the showcase window with a scheme
       chromium-colors           the colors that Chromium reads from GTK_THEME
       win-classic-screenshot    the screenshot script, on a built theme

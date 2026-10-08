@@ -17,6 +17,7 @@ nix develop
 | `nix build .#<preset>`      | build one scheme, for example `.#luna`           |
 | `nix build .#screenshots`   | make the screenshots in the sandbox              |
 | `update-screenshots`        | make them and copy them to `screenshots/` and `demos/` |
+| `update-icon-sheets`        | draw all the icons of SE98 in `screenshots/icons-*.png` |
 | `preview-theme <preset>`    | open the showcase window with a scheme, on your own display |
 | `win-classic-screenshot`    | the screenshot script, on a theme that is already built |
 | `nix fmt`                   | format the Nix files                             |
@@ -27,6 +28,13 @@ the "Dusk Red" scheme.
 `preview-theme` takes a command after the preset. Thus
 `preview-theme luna gtk3-widget-factory` opens the widget factory in place of
 the showcase window.
+
+The icon sheets show each icon of a theme at 16 pixels, first on the light
+scheme and then on the dark scheme. A sheet holds 32 rows of 32 icons, thus a
+theme has one or more sheets. `screenshots/icons-<theme>.txt` gives the
+order of the icons. A new icon goes at the end, and a removed icon keeps an
+empty cell, so the other icons stay in their position for a visual diff.
+`update-screenshots` also updates the icon sheets.
 
 Nix reads the files that Git tracks. A new file that is not in the index gives
 the error "is not tracked by Git" on the next `nix build`.
