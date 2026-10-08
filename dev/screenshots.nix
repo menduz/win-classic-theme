@@ -205,11 +205,10 @@ let
       export XDG_DATA_DIRS=${
         lib.concatStringsSep ":" [
           "${xfconf}/share"
-          # SE98 and the theme that it inherits. The script puts the package of
+          # SE98 and its fallback themes. The script puts the package of
           # the theme, with the icon theme of the scheme, in front of them.
-          # Adwaita stays behind them, as in the profile of a user: the modules
-          # take the cursor from that package, and a toolkit reads it for an
-          # icon that neither theme holds.
+          # Adwaita stays behind them, as in the profile of a user. A toolkit
+          # reads it for an icon that the other themes do not hold.
           "${se98}/share"
           "${chicago95}/share"
           "${adwaita-icon-theme}/share"

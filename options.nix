@@ -333,7 +333,7 @@ in
       package = lib.mkOption {
         type = lib.types.nullOr lib.types.package;
         default = pkgs.callPackage ./win98se.nix { };
-        defaultText = lib.literalMD "SE98, with Chicago95 for the icons that SE98 does not hold";
+        defaultText = lib.literalMD "SE98, with Chicago95, Papirus symbolic icons, and Adwaita as fallbacks";
         description = "The package that holds the icon theme.";
       };
     };

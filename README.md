@@ -218,7 +218,8 @@ A scheme takes five keys:
 
 The package of a scheme also holds an icon theme below `share/icons/<name>`:
 the action icons of SE98kde in the colors of the scheme. The icons of the window
-buttons come from SE98. The theme inherits SE98, and SE98 inherits Chicago95.
+buttons come from SE98. The theme inherits SE98, which looks for missing icons
+in Chicago95, then Papirus symbolic icons, then Adwaita.
 
 The two schemes above build `win-classic-dark` and `win-classic-light`. A
 scheme can also start from a preset and change single colors:
@@ -279,7 +280,7 @@ in the store. A new window takes the new scheme; an open one needs a restart.
 | `decorationLayout`          | that of the theme  | `gtk-decoration-layout`, the buttons that GTK draws |
 | `windowManagerButtonLayout` | that of the theme  | the buttons that the window manager draws           |
 | `baseFontSize`              | `8`                | the size of the interface font, in points           |
-| `iconTheme`                 | that of the scheme | the icon theme, it inherits SE98 and Chicago95      |
+| `iconTheme`                 | that of the scheme | SE98, Chicago95, Papirus symbolic, then Adwaita     |
 | `cursorTheme`               | Adwaita 16         | the cursor theme                                    |
 | `fontRendering`             | 96 dpi, hintslight | antialias, hinting, subpixel order and dpi          |
 | `gtk3Settings`              | `{ }`              | keys to add to the GTK3 settings, or to replace     |
@@ -374,3 +375,6 @@ the font file, as that license asks.
 [SE98KDE](https://github.com/Dejweed/SE98KDE) by Dejweed, commit `929a9a1`,
 under the GPL 2. The directory keeps the license and the readme of the author.
 The build writes the colors of the scheme in the icons.
+
+The SE98 package copies only the symbolic icons of Papirus into a separate
+fallback theme. Papirus is licensed under the GPL 3.
