@@ -104,6 +104,7 @@ win-classic-theme.packages.${system}.luna.override {
 | `tooltipbg`         | `#ffe0a8`   | tool tip background             |
 | `tooltipfg`         | `#000000`   | tool tip text                   |
 | `buttonscolor`      | `#dddddd`   | window button glyphs            |
+| `desktop`           | `#29272b`   | desktop, below the windows      |
 
 Give each color as a six digit hex value with a `#` in front. The build
 calculates the two 3D edges and the disabled text from `bgcolor`. See

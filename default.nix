@@ -58,6 +58,10 @@ let
     # Window button glyphs
     buttonscolor = "#dddddd";
 
+    # The desktop below the windows. Only a window manager that reads
+    # xfwm4/themerc (kwm) and Wine use it.
+    desktop = "#29272b";
+
     # The 3D edges and the disabled text are calculated from bgcolor. A scheme
     # that gives `highlight`, `shadow` or `disabledfg` stops the calculation of
     # that color.
@@ -201,6 +205,7 @@ let
       tooltipbg
       tooltipfg
       buttonscolor
+      desktop
       ;
     inherit
       highlight
@@ -225,7 +230,7 @@ let
     Windows Registry Editor Version 5.00
     [HKEY_CURRENT_USER\Control Panel\Colors]
     "ActiveTitle"="${wine cfg.activetitle}"
-    "Background"="${wine cfg.selectedbg}"
+    "Background"="${wine cfg.desktop}"
     "Hilight"="${wine cfg.selectedbg}"
     "HilightText"="${wine cfg.selectedtext}"
     "TitleText"="${wine cfg.activetitletext}"

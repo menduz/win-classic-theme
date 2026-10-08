@@ -22,6 +22,7 @@
 # | basecolor           | Window                  |
 # | basefg              | WindowText              |
 # | buttonscolor        | ControlText             |
+# | desktop             | Desktop                 |
 # | highlight           | ControlLightLight       |
 # | shadow              | ControlDark             |
 # | disabledfg          | GrayText                |
@@ -52,6 +53,7 @@
     basecolor = "#ffffff";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#3a6ea5";
     highlight = "#ffffff";
     shadow = "#808080";
     disabledfg = "#808080";
@@ -71,6 +73,7 @@
     basecolor = "#ffffff";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#3a6ea5";
     highlight = "#ffffff";
     shadow = "#808080";
     disabledfg = "#808080";
@@ -94,6 +97,7 @@
     basecolor = "#1e2426";
     basefg = "#dddddd";
     buttonscolor = "#dddddd";
+    desktop = "#29272b";
   };
 
   # The other classic schemes of Windows XP, in alphabetical order.
@@ -112,6 +116,7 @@
     basecolor = "#ffffff";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#420000";
     highlight = "#e1e0d2";
     shadow = "#8d8961";
     disabledfg = "#8d8961";
@@ -131,6 +136,7 @@
     basecolor = "#ffffff";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#a28d68";
     highlight = "#eae6dd";
     shadow = "#a28d68";
     disabledfg = "#a28d68";
@@ -150,6 +156,7 @@
     basecolor = "#ffffff";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#400040";
     highlight = "#c8d8d8";
     shadow = "#588078";
     disabledfg = "#588078";
@@ -169,6 +176,7 @@
     basecolor = "#ffffff";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#000000";
     highlight = "#d8d5ec";
     shadow = "#5a4eb1";
     disabledfg = "#5a4eb1";
@@ -188,6 +196,7 @@
     basecolor = "#ffffff";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#000000";
     highlight = "#f2ecd7";
     shadow = "#c6a646";
     disabledfg = "#c6a646";
@@ -207,6 +216,7 @@
     basecolor = "#c8e0d8";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#2c4e47";
     highlight = "#c8e0d8";
     shadow = "#489088";
     disabledfg = "#489088";
@@ -226,6 +236,7 @@
     basecolor = "#d8d0c8";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#402840";
     highlight = "#d8d0c8";
     shadow = "#786058";
     disabledfg = "#786058";
@@ -245,6 +256,7 @@
     basecolor = "#ffffff";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#420042";
     highlight = "#f5eacf";
     shadow = "#d7a52f";
     disabledfg = "#d7a52f";
@@ -264,6 +276,7 @@
     basecolor = "#ffffff";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#000000";
     highlight = "#c1ccd9";
     shadow = "#4f657d";
     disabledfg = "#4f657d";
@@ -283,6 +296,7 @@
     basecolor = "#ffffff";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#000042";
     highlight = "#ffffff";
     shadow = "#808080";
     disabledfg = "#808080";
@@ -302,6 +316,7 @@
     basecolor = "#ffffff";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#808080";
     highlight = "#e7d8dc";
     shadow = "#9f6070";
     disabledfg = "#9f6070";
@@ -321,6 +336,7 @@
     basecolor = "#ffffff";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#414141";
     highlight = "#cedce3";
     shadow = "#558097";
     disabledfg = "#558097";
@@ -340,6 +356,7 @@
     basecolor = "#ffffff";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#213f21";
     highlight = "#d0e3d3";
     shadow = "#599764";
     disabledfg = "#599764";
@@ -359,6 +376,7 @@
     basecolor = "#ffffff";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#000000";
     highlight = "#ffffff";
     shadow = "#808080";
     disabledfg = "#808080";
@@ -378,6 +396,7 @@
     basecolor = "#ffffff";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#004040";
     highlight = "#ffffff";
     shadow = "#808080";
     disabledfg = "#808080";
@@ -397,6 +416,7 @@
     basecolor = "#ffffff";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#00401d";
     highlight = "#eeeed0";
     shadow = "#bcbc41";
     disabledfg = "#bcbc41";
@@ -418,6 +438,7 @@
     basecolor = "#ffffff";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#004e98";
     highlight = "#ffffff";
     shadow = "#aca899";
     disabledfg = "#aca899";
@@ -437,6 +458,7 @@
     basecolor = "#ffffff";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#585768";
     highlight = "#ffffff";
     shadow = "#9d9da1";
     disabledfg = "#aca899";
@@ -456,6 +478,7 @@
     basecolor = "#ffffff";
     basefg = "#000000";
     buttonscolor = "#000000";
+    desktop = "#9dacbd";
     highlight = "#ffffff";
     shadow = "#aca899";
     disabledfg = "#aca899";
