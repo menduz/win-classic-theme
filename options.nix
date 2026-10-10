@@ -16,7 +16,8 @@ let
   # gives none either, so the value is an empty set in those two.
   osConfig = config._module.specialArgs.osConfig or { };
 
-  presets = import ./presets.nix;
+  winLib = pkgs.callPackage ./lib.nix { };
+  inherit (winLib) presets;
 
   # The theme names no font of its own. fontconfig holds the family for
   # `sans-serif`, and the theme reads that family, so a GTK program and a
@@ -33,60 +34,39 @@ let
 
   fontName = lib.head sansSerif;
 
-  schemeType = lib.types.submodule (
-    { name, config, ... }:
-    {
-      options = {
-        name = lib.mkOption {
-          type = lib.types.str;
-          default = "win-classic-${name}";
-          defaultText = lib.literalMD "`win-classic-` and the name of the scheme";
-          description = ''
-            The name of the theme below `share/themes`. GTK and Xfwm4 look up a
-            theme by this name.
-          '';
-        };
-
-        preset = lib.mkOption {
-          type = lib.types.nullOr (lib.types.enum (lib.attrNames presets));
-          default = null;
-          example = "windows-standard";
-          description = "The scheme of presets.nix that gives the colors.";
-        };
-
-        colors = lib.mkOption {
-          type = lib.types.attrsOf lib.types.str;
-          default = { };
-          example = lib.literalExpression ''{ bgcolor = "#c0c0c0"; }'';
-          description = ''
-            System colors of Windows. A color here wins over the same color of
-            `preset`. The README lists the names.
-          '';
-        };
-
-        dark = lib.mkOption {
-          type = lib.types.bool;
-          default = false;
-          description = ''
-            Whether the scheme is a dark one. A program that reads the
-            `color-scheme` key of `org.gnome.desktop.interface` follows this
-            value.
-          '';
-        };
-
-        iconTheme = lib.mkOption {
-          type = lib.types.str;
-          default = if cfg.iconTheme.name != null then cfg.iconTheme.name else config.name;
-          defaultText = lib.literalMD "`iconTheme.name`, or `name` when that is null";
-          description = ''
-            The icon theme of the scheme. The package of the scheme holds an
-            icon theme with the name of the scheme: the action icons of SE98kde
-            in the colors of the scheme. It inherits SE98.
-          '';
-        };
+  # One color scheme: a preset and the colors that replace colors of it.
+  schemeType = lib.types.submodule {
+    options = {
+      preset = lib.mkOption {
+        type = lib.types.nullOr (lib.types.enum (lib.attrNames presets));
+        default = null;
+        example = "windows-standard";
+        description = "The scheme of presets.nix that gives the colors.";
       };
-    }
-  );
+
+      colors = lib.mkOption {
+        type = lib.types.attrsOf lib.types.str;
+        default = { };
+        example = lib.literalExpression ''{ bgcolor = "#c0c0c0"; }'';
+        description = ''
+          System colors of Windows. A color here wins over the same color of
+          `preset`. The README lists the names.
+        '';
+      };
+    };
+  };
+
+  schemeOption =
+    kind:
+    lib.mkOption {
+      type = lib.types.nullOr schemeType;
+      default = null;
+      description = ''
+        The ${kind} scheme. A scheme that is null takes the colors of another
+        one: refer to `mkThemeFrom` in lib.nix. When all three are null, the
+        light scheme is "windows-standard" and the dark scheme is "dark".
+      '';
+    };
 
   settingsValue = lib.types.oneOf [
     lib.types.bool
@@ -108,30 +88,31 @@ let
     }
   '';
 
-  # Build one scheme with the settings of this configuration. A scheme that is
-  # not in `schemes` (for example the scheme of a sandbox) uses it too.
+  # Build a theme with the settings of this configuration. A theme that is
+  # not the theme of the session (for example the theme of a sandbox) uses it
+  # too. It takes `name`, and `colorSchemes` or `preset` and `colors`, as
+  # `mkThemeFrom` of lib.nix.
   mkPackage =
-    {
-      name,
-      preset ? null,
-      colors ? { },
-    }:
-    pkgs.callPackage ./default.nix {
-      inherit name preset colors;
-      inherit (cfg) titlebarButtons;
-      extraGtk3Css = lib.optionalString cfg.kwm.enable kwmGtk3Css;
+    args:
+    winLib.mkThemeFrom (
+      args
+      // {
+        inherit (cfg) titlebarButtons;
+        extraGtk3Css = lib.optionalString cfg.kwm.enable kwmGtk3Css;
+      }
+    );
+
+  package = mkPackage {
+    inherit (cfg) name;
+    colorSchemes = {
+      inherit (cfg) light dark contrast;
     };
+  };
 
-  # Build every scheme. A session can change to another one at run time, so
-  # all of the schemes must be in the profile. GTK finds none of them otherwise.
-  packages = lib.mapAttrs (_: scheme: mkPackage { inherit (scheme) name preset colors; }) cfg.schemes;
+  # The name of the theme of the scheme that the session starts with.
+  variantName = package.names.${cfg.variant};
 
-  scheme =
-    cfg.schemes.${cfg.variant} or (throw ''
-      win-classic-theme: the scheme "${cfg.variant}" does not exist. The schemes are:
-      ${lib.concatStringsSep " " (lib.attrNames cfg.schemes)}'');
-
-  package = packages.${cfg.variant};
+  iconThemeOf = name: if cfg.iconTheme.name != null then cfg.iconTheme.name else name;
 
   # Keys that GTK3 and GTK4 both read, for a scheme with `name`, `iconTheme`
   # and `dark`.
@@ -183,8 +164,8 @@ let
       gtk-hint-font-metrics = 1;
     };
 
-  # The settings files of GTK3 and GTK4 for a scheme. A scheme that is not in
-  # `schemes` (for example the scheme of a sandbox) uses it too.
+  # The settings files of GTK3 and GTK4 for a scheme. A theme that is not the
+  # theme of the session (for example the theme of a sandbox) uses it too.
   settingsFor =
     {
       name,
@@ -249,22 +230,20 @@ in
   options.programs.win-classic-theme = {
     enabled = lib.mkEnableOption "the win-classic-theme desktop theme";
 
-    schemes = lib.mkOption {
-      type = lib.types.attrsOf schemeType;
-      default = {
-        dark = {
-          preset = "dark";
-          dark = true;
-        };
-        standard = {
-          preset = "windows-standard";
-        };
-      };
+    name = lib.mkOption {
+      type = lib.types.str;
+      default = "win-classic";
       description = ''
-        The color schemes to build. Every scheme goes into the profile, so that
-        a session can change between them at run time.
+        The name of the theme below `share/themes`. Each scheme is a theme of
+        its own, with the name of the scheme after this one, for example
+        `win-classic-dark`. The theme with this name holds all schemes in one
+        GTK4 style sheet.
       '';
     };
+
+    light = schemeOption "light";
+    dark = schemeOption "dark";
+    contrast = schemeOption "high contrast";
 
     kwm.enable = lib.mkEnableOption ''
       the integration with the kwm window manager. kwm tells a tiled window
@@ -272,10 +251,13 @@ in
       Each scheme then hides the default GTK3 title bar of a maximized window'';
 
     variant = lib.mkOption {
-      type = lib.types.str;
+      type = lib.types.enum [
+        "light"
+        "dark"
+        "contrast"
+      ];
       default = "dark";
-      example = "standard";
-      description = "The scheme of `schemes` that the session starts with.";
+      description = "The scheme that the session starts with.";
     };
 
     titlebarButtons = lib.mkOption {
@@ -456,18 +438,10 @@ in
       readOnly = true;
       default = mkPackage;
       description = ''
-        A function that builds one scheme with the settings of this
-        configuration. It takes `name`, `preset` and `colors`, as a scheme of
-        `schemes`.
+        A function that builds a theme with the settings of this
+        configuration. It takes `name`, and `colorSchemes` or `preset` and
+        `colors`, as `mkThemeFrom` of lib.nix.
       '';
-    };
-
-    packages = lib.mkOption {
-      type = lib.types.attrsOf lib.types.package;
-      internal = true;
-      readOnly = true;
-      default = packages;
-      description = "The built theme of every scheme.";
     };
 
     theme = lib.mkOption {
@@ -475,10 +449,18 @@ in
       internal = true;
       readOnly = true;
       default = {
-        inherit (scheme) name dark iconTheme;
-        inherit package;
+        inherit package variantName;
+        # The theme with all schemes.
+        inherit (cfg) name;
+        # The name of the theme of each scheme.
+        inherit (package) names;
+        dark = package.dark.${cfg.variant};
+        contrast = cfg.variant == "contrast";
+        iconTheme = iconThemeOf variantName;
+        # The icon theme of each scheme.
+        iconThemes = lib.mapAttrs (_: iconThemeOf) package.names;
       };
-      description = "The scheme that `variant` selects.";
+      description = "The built theme, and the scheme that `variant` selects.";
     };
 
     fontName = lib.mkOption {
@@ -496,7 +478,11 @@ in
       type = lib.types.attrs;
       internal = true;
       readOnly = true;
-      default = settingsFor { inherit (scheme) name iconTheme dark; };
+      default = settingsFor {
+        name = variantName;
+        iconTheme = iconThemeOf variantName;
+        dark = package.dark.${cfg.variant};
+      };
       description = "The settings that GTK3 and GTK4 read.";
     };
 
@@ -530,18 +516,5 @@ in
         `gtk-custom-css` key of Ghostty.
       '';
     };
-  };
-
-  config = lib.mkIf cfg.enabled {
-    assertions = [
-      {
-        assertion = cfg.schemes ? ${cfg.variant};
-        message = ''
-          programs.win-classic-theme.variant is "${cfg.variant}", and that
-          scheme is not in programs.win-classic-theme.schemes. The schemes are:
-          ${lib.concatStringsSep " " (lib.attrNames cfg.schemes)}
-        '';
-      }
-    ];
   };
 }

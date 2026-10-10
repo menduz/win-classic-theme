@@ -68,9 +68,10 @@ nix build .#luna
 | `teal`             | classic scheme "Teal"                       |
 | `wheat`            | classic scheme "Wheat"                      |
 
-`nix build .#default` builds the "Dusk Red" scheme. The name of the theme below
-`share/themes` is `win-classic-<preset>`, with `win-classic-98` for
-`windows-classic` and `win-classic-standard` for `windows-standard`.
+The name of the theme below `share/themes` is `win-classic-<preset>`, with
+`win-classic-98` for `windows-classic` and `win-classic-standard` for
+`windows-standard`. `nix build .#default` builds a theme with three schemes:
+refer to [The three schemes](#the-three-schemes).
 
 ## Colors
 
@@ -78,12 +79,27 @@ nix build .#luna
 value of the preset:
 
 ```nix
-win-classic-theme.packages.${system}.luna.override {
+win-classic-theme.packages.${system}.luna.override (old: {
   name = "win-luna-red";
-  colors = {
+  colors = old.colors // {
     activetitle = "#6c2525";
     activetitle1 = "#6c2525";
   };
+})
+```
+
+The flake output `lib.${system}` gives the functions that build the theme.
+`mkScheme` makes one scheme from colors alone, and `mkTheme` puts three
+schemes in one theme:
+
+```nix
+let
+  inherit (win-classic-theme.lib.${system}) mkScheme mkTheme presets;
+in
+mkTheme {
+  name = "win-luna";
+  light = mkScheme { name = "win-luna-day"; colors = presets.luna; };
+  dark = mkScheme { name = "win-luna-night"; colors = presets.dark; };
 }
 ```
 
@@ -119,15 +135,15 @@ configuration declares the same block in each one.
 
 | Module                       | What it writes                                                                           |
 | ---------------------------- | ---------------------------------------------------------------------------------------- |
-| `nixosModules.default`       | `/etc/xdg/gtk-{3,4}.0/settings.ini`, the schemes, `GTK_THEME`                             |
+| `nixosModules.default`       | `/etc/xdg/gtk-{3,4}.0/settings.ini`, the theme                                            |
 | `homeManagerModules.default` | the GTK files of the user, the style sheet, the cursor, the Qt style, the GSettings keys |
 
 The NixOS module alone gives a themed session. The Home Manager module adds
 the files that only a user has, such as `~/.gtkrc-2.0` for the GTK2 style of
 Qt.
 
-`schemes` gives the color schemes to build. Every scheme goes into the profile,
-and `variant` names the one that the session starts with.
+`light`, `dark` and `contrast` give the color schemes, and `variant` names the
+one that the session starts with.
 
 ```nix
 {
@@ -143,11 +159,9 @@ and `variant` names the one that the session starts with.
       # The same block for both modules.
       theme = {
         enabled = true;
-        variant = "standard";
-        schemes = {
-          dark = { preset = "dark"; dark = true; };
-          standard = { preset = "windows-standard"; };
-        };
+        variant = "light";
+        light.preset = "windows-standard";
+        dark.preset = "dark";
         baseFontSize = 8;
       };
     in
@@ -168,7 +182,7 @@ and `variant` names the one that the session starts with.
 
             home-manager.users.alice = {
               imports = [ win-classic-theme.homeManagerModules.default ];
-              # The NixOS module already installs the schemes.
+              # The NixOS module already installs the theme.
               programs.win-classic-theme = theme // { installPackages = false; };
             };
           }
@@ -185,50 +199,57 @@ configuration that wants a package alone:
 { nixpkgs.overlays = [ win-classic-theme.overlays.default ]; }
 ```
 
-### A light scheme and a dark scheme
+### The three schemes
 
-`schemes` takes as many schemes as a configuration wants, and it builds every
-one of them. `variant` names the scheme that the session starts with:
+A theme holds a light scheme, a dark scheme and a high contrast scheme:
 
 ```nix
 programs.win-classic-theme = {
   enabled = true;
+  name = "win-classic";
   variant = "dark";
 
-  schemes = {
-    dark = {
-      preset = "dark"; # Redmond97 SE "Dusk Red"
-      dark = true; # gives `prefer-dark` and `gtk-application-prefer-dark-theme`
-    };
-    light = {
-      preset = "windows-standard"; # Windows XP "Windows Standard"
-    };
-  };
+  light.preset = "windows-standard"; # Windows XP "Windows Standard"
+  dark.preset = "dark"; # Redmond97 SE "Dusk Red"
+  contrast = null;
 };
 ```
 
-A scheme takes five keys:
+A scheme takes two keys:
 
-| Key         | Meaning                                                                    |
-| ----------- | -------------------------------------------------------------------------- |
-| `preset`    | the name of a scheme in `presets.nix`                                       |
-| `colors`    | single colors, which win over the same color of `preset`                    |
-| `dark`      | whether the scheme is a dark one                                            |
-| `name`      | the name below `share/themes`, `win-classic-` and the name of the scheme    |
-| `iconTheme` | the icon theme, `name` when `iconTheme.name` is null                        |
+| Key      | Meaning                                                  |
+| -------- | -------------------------------------------------------- |
+| `preset` | the name of a scheme in `presets.nix`                    |
+| `colors` | single colors, which win over the same color of `preset` |
 
-The package of a scheme also holds an icon theme below `share/icons/<name>`:
+A scheme that is null takes the colors of another one. A configuration that
+gives only `dark` gets the dark scheme in all three. When `contrast` is null,
+the high contrast scheme follows the color scheme.
+
+The theme has these directories below `share/themes`:
+
+| Name                    | Contents                                                       |
+| ----------------------- | -------------------------------------------------------------- |
+| `win-classic-light`     | the light scheme                                               |
+| `win-classic-dark`      | the dark scheme                                                |
+| `win-classic-contrast`  | the high contrast scheme                                       |
+| `win-classic`           | the three schemes in one GTK4 style sheet; else the light one  |
+
+GTK2, GTK3, GTK4, Xfwm4 and rofi select a scheme by its name. The GTK4 style
+sheet of `win-classic` holds a block for `@media (prefers-color-scheme: dark)`
+and one for `@media (prefers-contrast: more)`. Thus a program with that theme
+follows the color scheme and the contrast of the desktop, also while it runs.
+
+The theme of each scheme also holds an icon theme below `share/icons/<name>`:
 the action icons of SE98kde in the colors of the scheme. The icons of the window
 buttons come from SE98. The theme inherits SE98, which looks for missing icons
 in Chicago95, then Papirus symbolic icons, then Adwaita.
 
-The two schemes above build `win-classic-dark` and `win-classic-light`. A
-scheme can also start from a preset and change single colors:
+A scheme can also start from a preset and change single colors:
 
 ```nix
-midnight = {
+dark = {
   preset = "dark";
-  dark = true;
   colors = {
     activetitle = "#1a3a6c";
     activetitle1 = "#2a5a9c";
@@ -236,47 +257,58 @@ midnight = {
 };
 ```
 
+### A program that libadwaita draws
+
+libadwaita reads a theme only from `GTK_THEME`. Give it the theme with the
+three schemes, for that program alone:
+
+```sh
+GTK_THEME=win-classic ghostty
+```
+
+Do not set `GTK_THEME` for the session. GTK3 and GTK4 then read no theme from
+GSettings, and stay on one scheme.
+
 ### The scheme of a running session
 
 `variant` gives the scheme of a new session. A running session takes another
-scheme from four values, and none of them needs a rebuild:
+scheme from these values, and none of them needs a rebuild:
 
-| Value                                          | Who reads it                        |
-| ---------------------------------------------- | ----------------------------------- |
-| `org.gnome.desktop.interface gtk-theme`         | GTK, through the settings portal    |
-| `org.gnome.desktop.interface icon-theme`        | GTK, through the settings portal    |
-| `org.gnome.desktop.interface color-scheme`      | a program that follows dark or light |
-| `GTK_THEME`                                     | a program that libadwaita draws     |
+| Value                                              | Who reads it                                |
+| -------------------------------------------------- | ------------------------------------------- |
+| `org.gnome.desktop.interface gtk-theme`            | GTK3, GTK4, kwm and rofi                    |
+| `org.gnome.desktop.interface icon-theme`           | GTK3 and GTK4                               |
+| `org.gnome.desktop.interface color-scheme`         | libadwaita, a program that follows dark     |
+| `org.gnome.desktop.a11y.interface high-contrast`   | libadwaita, through the settings portal     |
 
-A script that changes to `win-classic-light` sets the four:
+A script that changes to the light scheme sets the four:
 
 ```sh
 gsettings set org.gnome.desktop.interface gtk-theme win-classic-light
 gsettings set org.gnome.desktop.interface icon-theme win-classic-light
 gsettings set org.gnome.desktop.interface color-scheme prefer-light
-
-# A program that systemd or a portal starts reads this environment. Export the
-# value first, because dbus-update-activation-environment copies it from this
-# shell.
-export GTK_THEME=win-classic-light
-systemctl --user set-environment "GTK_THEME=$GTK_THEME"
-dbus-update-activation-environment --systemd GTK_THEME
+gsettings set org.gnome.desktop.a11y.interface high-contrast false
 ```
 
-Every scheme of `schemes` must be in the profile for this to work. GTK looks a
-theme up in `$XDG_DATA_DIRS/themes`, so it cannot select a scheme that no
-profile holds. `installPackages` puts them there.
+A GTK3 or GTK4 program that runs takes the new scheme at once. GTK finds a
+theme in `$XDG_DATA_DIRS/themes`, so the theme must be in a profile.
+`installPackages` puts it there.
 
-A GTK program that is already open keeps its colors, because the GTK files are
-in the store. A new window takes the new scheme; an open one needs a restart.
+GTK 4.22 reads the color scheme from the settings portal at the start, but
+applies it to `@media (prefers-color-scheme)` only after the first change. A
+GTK4 program without libadwaita that starts with the dark scheme thus shows the
+light rules of `win-classic`. libadwaita gives the color scheme to GTK itself,
+so a libadwaita program has no such fault. A GTK4 program without libadwaita
+reads the theme of its scheme by name, and does not use `win-classic`.
 
 ### Options
 
 | Option                      | Default            | Meaning                                            |
 | --------------------------- | ------------------ | -------------------------------------------------- |
 | `enabled`                   | `false`            | whether the module writes anything                  |
-| `schemes`                   | `dark`, `standard` | the schemes to build                                |
-| `variant`                   | `"dark"`           | the scheme that the session starts with             |
+| `name`                      | `"win-classic"`    | the name of the theme below `share/themes`          |
+| `light`, `dark`, `contrast` | `null`             | the schemes; refer to "The three schemes"           |
+| `variant`                   | `"dark"`           | `light`, `dark` or `contrast`: the start scheme     |
 | `titlebarButtons`           | all                | the buttons of a title bar                          |
 | `decorationLayout`          | that of the theme  | `gtk-decoration-layout`, the buttons that GTK draws |
 | `windowManagerButtonLayout` | that of the theme  | the buttons that the window manager draws           |
@@ -287,7 +319,7 @@ in the store. A new window takes the new scheme; an open one needs a restart.
 | `gtk3Settings`              | `{ }`              | keys to add to the GTK3 settings, or to replace     |
 | `gtk4Settings`              | `{ }`              | keys to add to the GTK4 settings, or to replace     |
 | `extraCss`                  | `""`               | style sheet rules below the theme                   |
-| `installPackages`           | `true`             | whether the schemes go into the profile             |
+| `installPackages`           | `true`             | whether the theme goes into the profile             |
 
 Xfwm4 reads the theme by name. Set the same name in the property
 `/general/theme` of the channel `xfwm4`.

@@ -21,7 +21,7 @@ let
   # reads it too. A Qt program takes the icon of a button, of a tab and of a
   # menu item from the icon theme in it.
   gtk2Rc = ''
-    gtk-theme-name = "${cfg.theme.name}"
+    gtk-theme-name = "${cfg.theme.variantName}"
     gtk-icon-theme-name = "${cfg.theme.iconTheme}"
     gtk-cursor-theme-name = "${cfg.cursorTheme.name}"
     gtk-cursor-theme-size = ${toString cfg.cursorTheme.size}
@@ -36,9 +36,9 @@ in
       type = lib.types.bool;
       default = true;
       description = ''
-        Whether the schemes, the icon theme and the cursor theme go into the
+        Whether the theme, the icon theme and the cursor theme go into the
         system profile. GTK finds a theme in `$XDG_DATA_DIRS/themes`, so a
-        scheme that is in no profile is a scheme that GTK cannot select.
+        theme that is in no profile is a theme that GTK cannot select.
       '';
     };
   };
@@ -57,7 +57,7 @@ in
     };
 
     environment.systemPackages = lib.mkIf cfg.installPackages (
-      lib.attrValues cfg.packages
+      [ cfg.theme.package ]
       ++ lib.optional (cfg.iconTheme.package != null) cfg.iconTheme.package
       ++ lib.optional (cfg.cursorTheme.package != null) cfg.cursorTheme.package
     );
@@ -74,10 +74,6 @@ in
       selects the font. Windows 9x draws with MS Sans Serif; the flake gives
       that font in `packages.<system>.ms-sans-serif`.
     '';
-
-    # A program that libadwaita draws reads this variable, and no settings file.
-    # A session that changes the scheme replaces the value.
-    environment.sessionVariables.GTK_THEME = cfg.theme.name;
 
     # The Home Manager module writes GSettings keys, and so does a session
     # that changes the scheme. A GTK program on Wayland reads the icon theme

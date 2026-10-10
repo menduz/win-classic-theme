@@ -34,13 +34,15 @@
         "dark"
       ];
 
-      # One package for each preset.
+      winLibFor = pkgs: pkgs.callPackage ./lib.nix { };
+
+      # One package for each preset: one scheme.
       themesFor =
         pkgs:
         lib.mapAttrs (
-          preset: _:
-          pkgs.callPackage ./default.nix {
-            inherit preset;
+          preset: colors:
+          (winLibFor pkgs).mkScheme {
+            inherit colors;
             name = themeName preset;
           }
         ) presets;
@@ -70,6 +72,16 @@
           themes = themesFor pkgs;
           icons = iconSheetsFor pkgs;
 
+          # The light scheme and the dark scheme of the screenshots in one
+          # theme. The presets hold no high contrast scheme, so the third
+          # scheme is "windows-classic": the checks then read three blocks.
+          win-classic-theme = (winLibFor pkgs).mkTheme {
+            name = "win-classic";
+            light = themes.windows-standard;
+            dark = themes.dark;
+            contrast = themes.windows-classic;
+          };
+
           shots = pkgs.callPackage ./dev/screenshots.nix {
             themes = lib.listToAttrs (
               map (preset: lib.nameValuePair (themeName preset) themes.${preset}) shown
@@ -79,7 +91,8 @@
         in
         themes
         // {
-          default = themes.dark;
+          default = win-classic-theme;
+          inherit win-classic-theme;
           inherit (shots) screenshots showcase;
           icon-sheets = icons.sheets;
           # The interface font of Windows 9x. The modules install no font: they
@@ -120,6 +133,7 @@
           pkgs.callPackage ./dev/checks.nix {
             theme = self.packages.${pkgs.system}.windows-standard;
             themeName = themeName "windows-standard";
+            combined = self.packages.${pkgs.system}.win-classic-theme;
           }
         )
       );
@@ -148,13 +162,16 @@
       # The system part and the user part of a session. A configuration that
       # uses Home Manager imports both, and declares the same
       # `programs.win-classic-theme` block in each one.
+      # The functions that build the theme. Refer to lib.nix.
+      lib = forEachSystem winLibFor;
+
       nixosModules.default = import ./nixos-module.nix;
       homeManagerModules.default = import ./home-manager-module.nix;
 
       # `pkgs.win-classic-theme` and `pkgs.ms-sans-serif` in another flake. See
       # the README.
       overlays.default = final: prev: {
-        win-classic-theme = final.callPackage ./default.nix { };
+        win-classic-theme = (final.callPackage ./lib.nix { }).mkThemeFrom { };
         ms-sans-serif = final.callPackage ./fonts { };
         se98 = final.callPackage ./win98se.nix { };
       };

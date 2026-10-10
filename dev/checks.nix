@@ -12,6 +12,8 @@
   prettier,
   theme,
   themeName,
+  # A theme of theme.nix: the schemes in one GTK4 style sheet.
+  combined,
 }:
 let
   checker =
@@ -45,6 +47,23 @@ in
         ${gtk3Checker}/bin/check-css "$dir/gtk-3.0/gtk.css"
         # GTK4 reads the style sheet of GTK3, which holds the style properties
         # of GTK3.
+        ${gtk4Checker}/bin/check-css --ignore-unknown-property "$dir/gtk-4.0/gtk.css"
+        touch "$out"
+      '';
+
+  # The parser of GTK reads the style sheets that theme.nix writes: the GTK4
+  # style sheet with an @media block for each scheme, and gtk-dark.css.
+  css-combined =
+    runCommand "win-classic-check-css-combined"
+      {
+        nativeBuildInputs = [
+          gtk3Checker
+          gtk4Checker
+        ];
+      }
+      ''
+        dir=${combined}/share/themes/${combined.names.all}
+        ${gtk3Checker}/bin/check-css "$dir/gtk-3.0/gtk-dark.css"
         ${gtk4Checker}/bin/check-css --ignore-unknown-property "$dir/gtk-4.0/gtk.css"
         touch "$out"
       '';

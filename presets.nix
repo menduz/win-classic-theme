@@ -2,8 +2,8 @@
 # The source of the colors is this gist:
 # https://gist.github.com/zaxbux/64b5a88e2e390fb8f8d24eb1736f71e0
 #
-# Select a scheme with the `preset` argument of `default.nix`. The set is also
-# available as `passthru.presets` on the built theme.
+# lib.nix gives the colors of a preset to `mkScheme`, and `mkThemeFrom` takes a
+# preset for each scheme. The set is also available as `presets` of lib.nix.
 #
 # This table shows the Windows name of each color of the theme:
 #
@@ -80,7 +80,7 @@
   };
 
   # The dark scheme of this theme, the "Dusk Red" colors. It is
-  # the scheme that `default.nix` builds without a preset. Windows has no dark
+  # the scheme that `scheme.nix` builds without colors. Windows has no dark
   # scheme, so this one gives no `highlight`, no `shadow` and no `disabledfg`:
   # the build calculates the three from `bgcolor`.
   dark = {

@@ -262,7 +262,7 @@ in
     name = "update-screenshots";
     runtimeInputs = [ update-icon-sheets ];
     text = ''
-      if [ ! -e ./default.nix ] || [ ! -e ./presets.nix ]; then
+      if [ ! -e ./lib.nix ] || [ ! -e ./presets.nix ]; then
         echo "update-screenshots: run this in the directory of the theme" >&2
         exit 1
       fi

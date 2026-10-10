@@ -23,7 +23,7 @@ nix develop
 | `nix fmt`                   | format the Nix files                             |
 
 The name of a package is the name of the preset. `nix build .#default` builds
-the "Dusk Red" scheme.
+a theme with three schemes, `win-classic`.
 
 `preview-theme` takes a command after the preset. Thus
 `preview-theme luna gtk3-widget-factory` opens the widget factory in place of
@@ -231,19 +231,62 @@ The screenshot command disables the timed progress indicators in the two
 widget factories. Thus repeated builds produce the same pixels. `nix build
 --rebuild .#screenshots` compares a second build with the first one.
 
-The files of this section are not part of the theme. `default.nix` keeps them
-out of the source. Thus a new screenshot does not build the theme again.
+The files of this section are not part of the theme. `scheme.nix` takes only
+the files of the theme into its source. Thus a new screenshot does not build
+the theme again.
+
+## How the build makes the theme with three schemes
+
+`lib.nix` holds the functions of the build. Each file below gives one of them;
+callPackage gives the build tools, and the result is a function:
+
+| File         | Function                                  | Result                                     |
+| ------------ | ----------------------------------------- | ------------------------------------------ |
+| `scheme.nix` | `mkScheme { name, colors }`               | one scheme: the GTK theme and the KDE themes |
+| `icons.nix`  | `mkIcons { name, fgcolor, selectedbg }`   | the icon theme of a scheme                 |
+| `theme.nix`  | `mkTheme { name, light, dark, contrast }` | three schemes in one theme                 |
+| `lib.nix`    | `mkThemeFrom { name, colorSchemes }`      | a theme from presets and colors            |
+
+`mkScheme` knows no preset: it takes the colors alone. A color that is not
+given takes the value of the default scheme. Each scheme links the icon theme
+of `mkIcons`, thus a change to a style sheet does not build the icons again.
+
+`mkTheme` takes three results of `mkScheme`, and puts them in one package as
+`<name>-light`, `<name>-dark` and `<name>-contrast`. A scheme can be in more
+than one place: the build copies it and replaces its name in the files and in
+the file names. `mkThemeFrom` gives the colors of the presets, fills in a
+scheme that is not given, and builds two schemes with the same colors one time.
+
+The theme `<name>` is a copy of the light scheme. `merge-css.py` writes its
+GTK4 style sheet:
+
+1. It puts the text of each `@import` in place of the import. GTK4 reads no
+   `@import` in an `@media` block.
+2. It writes each relative `url()` relative to `gtk-4.0/`. The GTK files of the
+   dark and of the contrast scheme are copies in `<name>/dark/` and
+   `<name>/contrast/`, thus the theme points to no other directory.
+3. It puts the dark scheme in `@media (prefers-color-scheme: dark)`, and the
+   contrast scheme in `@media (prefers-contrast: more)`. Without a contrast
+   scheme, the style sheet has no contrast block.
+4. GTK reads `@define-color` only outside an `@media` block. Thus each color of
+   a block gets a prefix, for example `@scheme_dark_bg_color`, and its
+   definition goes before the block. The script stops if a definition keeps a
+   name without the prefix: that definition would replace a color of the light
+   scheme.
+
+The same script writes `<name>/gtk-3.0/gtk-dark.css` from the dark scheme.
+`checks.css-combined` reads both style sheets with the parsers of GTK3 and
+GTK4.
 
 ## More options
 
-[README.md](README.md) gives the options `preset` and `colors`. These are the
-three other options.
+[README.md](README.md) gives the option `colors`. These are the three other
+options of `mkScheme`.
 
 ### name
 
-The name of the theme. It sets the directory below `share/themes`, the value of
-`gtk-theme-name` and the value of `GTK_THEME`. The default is
-`win-classic-theme`.
+The name of the theme. It sets the directory below `share/themes` and the value
+of `gtk-theme-name`. The default is `win-classic-theme`.
 
 The flake gives a different name to each preset package. The name is
 `win-classic-<preset>`. The two exceptions are `win-classic-98` for
@@ -303,8 +346,9 @@ must set the same order at another place.
 nix build .#default
 ```
 
-The default package is the "Dusk Red" scheme. Its name is `win-classic-dark`.
-It has all the title bar buttons.
+The default package is a theme with three schemes, `win-classic`: the light
+scheme is "Windows Standard", the dark scheme is "Dusk Red", and the contrast
+scheme is "windows-classic". It has all the title bar buttons.
 
 ### Example 2: a scheme of Windows
 
@@ -334,13 +378,13 @@ The values in `colors` have priority over the values of the preset. This
 example takes Luna and makes the title bar red:
 
 ```nix
-inputs.win-classic-theme.packages.${system}.luna.override {
+inputs.win-classic-theme.packages.${system}.luna.override (old: {
   name = "win-luna-red";
-  colors = {
+  colors = old.colors // {
     activetitle = "#6c2525";
     activetitle1 = "#6c2525";
   };
-}
+})
 ```
 
 The result keeps the face color `#ece9d8` of Luna.
@@ -424,8 +468,13 @@ share/aurorae/themes/<name>/
 share/plasma/desktoptheme/<name>/
                 the Plasma style
 share/icons/<name>/
-                the icon theme, the action icons of SE98kde
+                the icon theme, the action icons of SE98kde (a link to
+                the result of mkIcons)
 ```
+
+This is one scheme, the result of `mkScheme`. A result of `mkTheme` holds the
+same files for `<name>-light`, `<name>-dark` and `<name>-contrast`, and the
+theme `<name>` with the three schemes in its GTK4 style sheet.
 
 ## Chromium and Brave
 

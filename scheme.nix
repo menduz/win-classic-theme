@@ -1,17 +1,23 @@
+# One color scheme as a complete theme: share/themes/<name>, the KDE themes,
+# and the icon theme share/icons/<name> of icons.nix.
+#
+# callPackage gives the build tools. The result is a function that takes the
+# colors of the scheme. It knows no preset: lib.nix gives the colors of a
+# preset.
 {
   lib,
   stdenv,
   callPackage,
   imagemagick,
-
-  # The icon theme that the icon theme of the scheme inherits. The build reads
-  # its links.
-  se98 ? callPackage ./win98se.nix { },
-
+}:
+let
+  mkIcons = callPackage ./icons.nix { };
+in
+{
   name ? "win-classic-theme",
 
-  preset ? null,
-
+  # System colors of Windows. A color that is not here takes the value of the
+  # default scheme below ("Dusk Red").
   colors ? { },
 
   titlebarButtons ? {
@@ -23,16 +29,6 @@
   extraGtk3Css ? "",
 }:
 let
-  presets = import ./presets.nix;
-
-  presetColors =
-    if preset == null then
-      { }
-    else
-      presets.${preset} or (throw ''
-        win-classic-theme: the preset "${preset}" does not exist. The presets are:
-        ${lib.concatStringsSep " " (lib.attrNames presets)}'');
-
   cfg = {
     # 3D objects
     bgcolor = "#303131";
@@ -85,7 +81,6 @@ let
       0.0
     ];
   }
-  // presetColors
   // colors;
 
   hexValue = {
@@ -276,6 +271,11 @@ let
     colors = schemeColors;
   };
 
+  icons = mkIcons {
+    inherit name;
+    inherit (cfg) fgcolor selectedbg;
+  };
+
   # Write a set of generated files below a directory.
   installFiles =
     dir: files:
@@ -289,35 +289,27 @@ stdenv.mkDerivation {
   pname = name;
   version = "20260803";
 
-  # The theme is the images, the style sheets and the metadata. The files of
-  # the development environment are not part of it. Thus a new screenshot or a
-  # new line in the README does not build the theme again.
+  # The theme is the images, the style sheets and the metadata. Only these go
+  # into the source. Thus a new screenshot, a new line in the README or a
+  # change to the icons does not build the theme again.
   src = builtins.path {
     name = "win-classic-theme";
     path = ./.;
     filter =
       path: type:
-      !(builtins.elem (baseNameOf path) [
-        ".git"
-        ".gitignore"
-        "DEVELOPMENT.md"
-        "demos"
-        "dev"
-        "flake.lock"
-        "flake.nix"
-        "fonts"
-        "home-manager-module.nix"
-        "nixos-module.nix"
-        "options.nix"
-        "qt"
-        "README.md"
-        "aurorae.nix"
-        "pixelmap.nix"
-        "plasma.nix"
-        "win98se.nix"
-        "result"
-        "screenshots"
-      ]);
+      let
+        top = lib.head (lib.splitString "/" (lib.removePrefix (toString ./. + "/") (toString path)));
+      in
+      builtins.elem top [
+        "gtk-2.0"
+        "gtk-3.0"
+        "gtk-4.0"
+        "images"
+        "index.theme"
+        "LICENSE"
+        "rofi"
+        "xfwm4"
+      ];
   };
 
   nativeBuildInputs = [ imagemagick ];
@@ -464,16 +456,6 @@ stdenv.mkDerivation {
     cd ../..
     rm -rf images
 
-    # Each SVG icon of SE98kde holds the Breeze colors in a style sheet. KDE
-    # replaces that style sheet at run time, GTK and Qt draw it as it is. Thus
-    # the colors of the scheme go into it, the same colors that plasma.nix
-    # gives to KDE. A symbolic icon gets the color of the text from GTK.
-    find icons/SE98kde -name '*.svg' -type f -exec sed -z -E -i \
-      -e 's/(\.ColorScheme-Highlight[[:space:]]*\{[[:space:]]*color:[[:space:]]*)#[0-9a-fA-F]{6}/\1${cfg.selectedbg}/g' \
-      -e 's/(\.ColorScheme-[A-Za-z]*Text[[:space:]]*\{[[:space:]]*color:[[:space:]]*)#[0-9a-fA-F]{6}/\1${cfg.fgcolor}/g' \
-      {} +
-    sed -i 's/^Name=.*/Name=${name}/' icons/SE98kde/index.theme
-
     runHook postBuild
   '';
 
@@ -489,79 +471,8 @@ stdenv.mkDerivation {
     cp ${builtins.toFile "theme.reg" wineReg} "$theme"/wine/${name}.reg
 
     # The icon theme of the scheme has the name of the scheme. It inherits SE98.
-    mkdir -p $out/share/icons/${name}
-    # The copy follows the links, because some links point to an icon that the
-    # next step removes.
-    cp -rL icons/SE98kde/actions icons/SE98kde/index.theme $out/share/icons/${name}/
-
-    # SE98 gives the icons of the window buttons. It draws them at more sizes,
-    # and with smaller glyphs. GTK selects a size only in the first theme that
-    # holds the icon, thus these icons must not be in this theme.
-    find $out/share/icons/${name}/actions -name 'window-*.svg' -delete
-
-    # SE98 gives some names as links to another icon, for example
-    # gtk-media-pause links to media-playback-pause. GTK finds the name in SE98
-    # and takes the icon of SE98, not the icon of this theme. Thus each link of
-    # SE98 to an icon of this theme gets the same link here. A name stays out
-    # when SE98 also holds it as a file, or when its links in SE98 point to
-    # different icons. A link from a symbolic name to a name that is not
-    # symbolic also stays out, because GTK paints the two kinds in different
-    # ways. The loop also follows a link to a link.
-    icons=$out/share/icons/${name}
-    find ${se98}/share/icons/SE98 \( -type f -o -type l \) -printf '%y\t%f\t%l\n' |
-      awk -F '\t' '
-        $2 ~ /\.symbolic\.png$/ || $2 !~ /\.(png|svg|xpm)$/ { next }
-        {
-          alias = $2
-          sub(/\.(png|svg|xpm)$/, "", alias)
-          if ($1 == "f") { file[alias] = 1; next }
-          target = $3
-          sub(/.*\//, "", target)
-          sub(/\.(png|svg|xpm)$/, "", target)
-          if (!((alias, target) in seen)) {
-            seen[alias, target] = 1
-            count[alias]++
-            only[alias] = target
-          }
-        }
-        END {
-          for (alias in count) {
-            target = only[alias]
-            if (alias in file || count[alias] != 1 || alias ~ /^window-/) continue
-            if ((alias ~ /-symbolic$/) != (target ~ /-symbolic$/)) continue
-            print alias "\t" target
-          }
-        }' | sort >se98-links
-    while true; do
-      find "$icons" -mindepth 3 -printf '%f\n' | sed 's/\.[^.]*$//' | sort -u >names
-      awk -F '\t' 'NR == FNR { have[$1]; next } ($2 in have) && !($1 in have)' \
-        names se98-links >new-links
-      if [ ! -s new-links ]; then
-        break
-      fi
-      while IFS=$'\t' read -r alias target; do
-        for file in "$icons"/actions/*/"$target".*; do
-          [ -e "$file" ] || continue
-          dir=$(dirname "$file")
-          if [ -z "$(find "$dir" -maxdepth 1 -name "$alias.*" -print -quit)" ]; then
-            ln -s "$(basename "$file")" "$dir/$alias.''${file##*.}"
-          fi
-        done
-      done <new-links
-    done
-    rm se98-links names new-links
-
-    # SE98 links media-seek-backward-rtl and media-seek-forward-rtl to a
-    # different icon at each size. In a text from right to left, backward
-    # points to the right, as the icon of SE98 at 16 pixels shows.
-    for dir in "$icons"/actions/*; do
-      if [ -e "$dir/media-seek-forward.svg" ]; then
-        ln -s media-seek-forward.svg "$dir/media-seek-backward-rtl.svg"
-      fi
-      if [ -e "$dir/media-seek-backward.svg" ]; then
-        ln -s media-seek-backward.svg "$dir/media-seek-forward-rtl.svg"
-      fi
-    done
+    mkdir -p $out/share/icons
+    ln -s ${icons}/share/icons/${name} $out/share/icons/${name}
 
     ${installFiles "$out/share/aurorae/themes/${name}" aurorae}
     ${installFiles "$out/share/plasma/desktoptheme/${name}" plasma}
@@ -600,19 +511,6 @@ stdenv.mkDerivation {
       fi
     done
 
-    # Each color of the style sheet of an icon must be a color of the scheme.
-    while read -r color; do
-      case "$color" in
-        '${cfg.fgcolor}' | '${cfg.selectedbg}') ;;
-        *)
-          echo "an icon holds the color $color, and the scheme does not" >&2
-          bad=1
-          ;;
-      esac
-    done < <(find $out/share/icons/${name} -name '*.svg' -exec cat {} + |
-      grep -ozE '\.ColorScheme-[A-Za-z]+[[:space:]]*\{[[:space:]]*color:[[:space:]]*#[0-9a-fA-F]{6}' |
-      tr '\0' '\n' | grep -oE '#[0-9a-fA-F]{6}$' | sort -u)
-
     if [ "$bad" -ne 0 ]; then
       exit 1
     fi
@@ -620,7 +518,15 @@ stdenv.mkDerivation {
     runHook postInstallCheck
   '';
 
-  passthru = { inherit decorationLayout presets; };
+  passthru = {
+    inherit decorationLayout icons;
+    # The name below share/themes. theme.nix reads it.
+    themeName = name;
+    # The colors of the scheme, with the calculated ones.
+    colors = schemeColors;
+    # A scheme is dark when its window color is dark.
+    dark = lib.foldl' builtins.add 0 bgRgb < 384;
+  };
 
   meta = {
     description = "Nostalgic windows theme for NixOS.";

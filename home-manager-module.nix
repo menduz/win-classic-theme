@@ -10,8 +10,11 @@
 let
   cfg = config.programs.win-classic-theme;
 
+  # GTK2, GTK3 and GTK4 select the theme of a scheme by its name. toggle-theme
+  # of a session changes the name in GSettings.
   themeAttrs = {
-    inherit (cfg.theme) name package;
+    name = cfg.theme.variantName;
+    inherit (cfg.theme) package;
   };
 
   # The icon theme of the scheme inherits the theme of `iconTheme.package`.
@@ -28,8 +31,8 @@ in
       type = lib.types.bool;
       default = true;
       description = ''
-        Whether the schemes go into the profile of the user. Set this to false
-        when the NixOS module already puts them in the system profile.
+        Whether the theme goes into the profile of the user. Set this to false
+        when the NixOS module already puts it in the system profile.
       '';
     };
 
@@ -45,7 +48,7 @@ in
   };
 
   config = lib.mkIf cfg.enabled {
-    home.packages = lib.mkIf cfg.installPackages (lib.attrValues cfg.packages);
+    home.packages = lib.mkIf cfg.installPackages [ cfg.theme.package ];
 
     # fontconfig reads the profile of the user only with this option. A
     # configuration that puts the interface font in `home.packages`, and not in
@@ -82,10 +85,15 @@ in
         extraCss = cfg.css;
       };
 
-      # GTK4 reads no theme by name from this file. Home Manager writes an
-      # `@import` of the style sheet of the theme instead.
+      # GTK4 reads the theme by name from GSettings, as GTK3. Without a
+      # package, Home Manager writes no `@import` of the theme into the style
+      # sheet of the user: that import would hold the scheme of the build
+      # above the scheme that GSettings selects.
       gtk4 = {
-        theme = themeAttrs;
+        theme = {
+          name = cfg.theme.variantName;
+          package = null;
+        };
         extraConfig = cfg.settings.gtk4;
         extraCss = cfg.css;
       };
@@ -98,12 +106,13 @@ in
       x11.enable = true;
     };
 
-    # A program that libadwaita draws reads this variable, and no settings file.
-    home.sessionVariables.GTK_THEME = cfg.theme.name;
-
     dconf.settings = {
       "org/gnome/desktop/interface" = {
         color-scheme = if cfg.theme.dark then "prefer-dark" else "prefer-light";
+      };
+      # The settings portal gives this key as the contrast of the desktop.
+      "org/gnome/desktop/a11y/interface" = {
+        high-contrast = cfg.theme.contrast;
       };
       # The same button order as the theme.
       "org/gnome/desktop/wm/preferences" = {
