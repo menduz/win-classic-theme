@@ -22,9 +22,11 @@ title_vertical_offset_active=1
 title_vertical_offset_inactive=1
 borderless_maximize=0
 # Not read by xfwm4: the right end of the caption gradient, the glyph of the
-# buttons and the desktop color, for window managers that draw the title bar
-# and the desktop (kwm).
+# buttons, the desktop color and the tooltip colors, for window managers that
+# draw the title bar, the desktop and their own tooltips (kwm).
 active_gradient_color=@activetitle1@
 inactive_gradient_color=@inactivetitle@
 buttons_color=@buttonscolor@
 desktop_color=@desktop@
+tooltip_color=@tooltipbg@
+tooltip_text_color=@tooltipfg@
