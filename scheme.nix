@@ -170,6 +170,12 @@ let
   # color, so that the corners do not show. These are the colors of Brave with
   # no theme color, in the dark mode and in the light mode.
   chromiumframe = cfg.chromiumframe or (if darkBase then "#1f1f23" else "#e4e4e5");
+  # The bar of a window manager that draws its own bar (kwm) has the colors of
+  # a text box. Tags without windows have the color of disabled text.
+  barbg = cfg.barbg or cfg.basecolor;
+  barfg = cfg.barfg or cfg.basefg;
+  barselectedfg = cfg.barselectedfg or barfg;
+  baremptyfg = cfg.baremptyfg or disabledfg;
 
   buttons = {
     minimize = true;
@@ -213,6 +219,10 @@ let
       disabledfg
       chromiumbase
       chromiumframe
+      barbg
+      barfg
+      barselectedfg
+      baremptyfg
       ;
     themename = name;
     decorationlayout = decorationLayout;

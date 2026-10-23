@@ -75,7 +75,7 @@ tokens. The build replaces each token with a color. These files hold tokens:
 | `gtk-3.0/gtk.css`                                | all colors                      |
 | `gtk-2.0/gtkrc`                                  | the GTK2 color scheme           |
 | `gtk-3.0/settings.ini`, `gtk-4.0/settings.ini`   | `decorationlayout`              |
-| `xfwm4/themerc`                                  | title bar colors, `xfwmbuttons` |
+| `xfwm4/themerc`                                  | title bar and bar colors, `xfwmbuttons` |
 | `xfwm4/*.xpm`                                    | `buttonscolor`                  |
 | `index.theme`                                    | `themename`                     |
 | `rofi/win-classic.rasi`                          | the menu and text box colors    |
@@ -324,6 +324,16 @@ and stop the calculation. Each preset does this:
 The build also calculates `chromiumbase`, the address bar of Chromium, and
 `chromiumframe`, its tab strip. Refer
 to [Chromium and Brave](#chromium-and-brave).
+
+The bar of kwm takes four colors from `xfwm4/themerc`. The build calculates
+each one that `colors` does not give:
+
+| Name            | Default        | Function                         |
+| --------------- | -------------- | -------------------------------- |
+| `barbg`         | `basecolor`    | bar background                   |
+| `barfg`         | `basefg`       | bar text                         |
+| `barselectedfg` | `barfg`        | selected tag, focused title      |
+| `baremptyfg`    | `disabledfg`   | tags without windows             |
 
 ### titlebarButtons
 
